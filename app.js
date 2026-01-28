@@ -28,7 +28,6 @@ const indexRouter = require('./routes/index');
 const authRouter = require('./routes/auth');
 const scholarshipsRouter = require('./routes/scholarships');
 const applicationsRouter = require('./routes/applications');
-const chatRouter = require('./routes/chat');
 const adminChatRoutes = require('./routes/adminChat');
 const notificationsRouter = require('./routes/notifications');
 
@@ -83,7 +82,6 @@ app.use('/', indexRouter);
 app.use('/auth', authRouter);
 app.use('/scholarships', scholarshipsRouter);
 app.use('/applications', applicationsRouter);
-app.use('/chat', chatRouter);           // دردشة الطالب
 app.use('/admin/chat', adminChatRoutes); // دردشة الإدمن
 app.use('/notifications', notificationsRouter);
 app.use('/profile', require('./routes/profile'));
@@ -100,4 +98,5 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
+
 
