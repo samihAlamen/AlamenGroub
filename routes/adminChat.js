@@ -6,7 +6,7 @@ const User = require('../models/User');
 const { ensureAuth, ensureRole } = require('../middlewares/auth');
 
 // صفحة الدردشة للإدمن
-router.get('/', ensureAuth, ensureRole('admin'), async (req, res) => {
+router.get('/admin-list', ensureAuth, ensureRole('admin'), async (req, res) => {
     try {
         const conversations = await Conversation.find().populate('participants');
         res.render('chat/admin-list', { conversations });
@@ -29,4 +29,5 @@ router.get('/:conversationId', ensureAuth, ensureRole('admin'), async (req, res)
 });
 
 module.exports = router;
+
 
