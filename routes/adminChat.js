@@ -3,11 +3,10 @@ const router = express.Router();
 const Conversation = require('../models/Conversation');
 const Message = require('../models/Message');
 const User = require('../models/User');
-const auth = require('../middlewares/auth');
-const roles = require('../middlewares/roles');
+const { ensureAuth, ensureRole } = require('../middlewares/auth');
 
 // صفحة الدردشة للإدمن
-router.get('/', auth, roles('admin'), async (req, res) => {
+router.get('/', ensureAuth, ensureRole('admin'), async (req, res) => {
     try {
         const conversations = await Conversation.find().populate('participants');
         res.render('chat/admin-list', { conversations });
@@ -18,7 +17,7 @@ router.get('/', auth, roles('admin'), async (req, res) => {
 });
 
 // تفاصيل محادثة محددة
-router.get('/:conversationId', auth, roles('admin'), async (req, res) => {
+router.get('/:conversationId', ensureAuth, ensureRole('admin'), async (req, res) => {
     try {
         const conversation = await Conversation.findById(req.params.conversationId).populate('participants');
         const messages = await Message.find({ conversation: conversation._id }).populate('sender');
@@ -30,3 +29,4 @@ router.get('/:conversationId', auth, roles('admin'), async (req, res) => {
 });
 
 module.exports = router;
+
