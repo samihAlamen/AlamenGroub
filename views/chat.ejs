@@ -1,21 +1,496 @@
-<h1>الدردشة مع الإدارة</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Conversation</title>
+  <style>
+@media (max-width: 768px) {
+  .preview-container img,
+  .preview-container video,
+  .chat-container img,
+  .chat-container video {
+    max-width: 100%;
+    width: 100%;
+    max-height: none;
+    height: auto;
+  }
 
-<div id="chat-messages" style="height:400px; overflow-y:auto;">
-    <% messages.forEach(message => { %>
-        <div class="<%= message.sender && message.sender._id.toString() === user.id.toString() ? 'sent' : 'received' %>">
-            <strong>
-              <%= message.sender.name %>
-              <% if (message.sender.role === 'admin') { %>
-                (الإدارة)
-              <% } %>
-            </strong>
-            <p><%= message.content %></p>
-            <small><%= new Date(message.createdAt).toLocaleString() %></small>
-        </div>
-    <% }) %>
-</div>
+  .chat-container {
+    padding: 10px;
+  }
 
-<form action="/chat/send" method="POST">
-    <textarea name="content" required placeholder="اكتب رسالتك..."></textarea>
-    <button type="submit">إرسال</button>
+  .upload-form {
+    padding: 10px;
+  }
+}
+
+    
+@media (max-width: 768px) {
+  #msgs {
+    height: 60vh; /* أكبر عرض ممكن على الهاتف */
+  }
+}
+
+
+
+.post-card {
+  background-color: var(--post-bg-color);
+  color: var(--post-text-color);
+}
+
+.chat-box {
+  background-color: var(--chat-bg-color);
+  color: var(--chat-text-color);
+}
+
+.notification {
+  background-color: var(--notification-color);
+}
+
+.saved-post {
+  background-color: var(--saved-posts-bg-color);
+}
+ 
+
+
+
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f7fa;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      height: 100vh;
+      padding-top: 50px;
+    }
+
+    .chat-container {
+      width: 80%;
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+      padding: 10px;
+    display: flex;
+    flex-direction: column;
+    height: 90vh;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #4c6ef5;
+    }
+
+    #msgs {
+      height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+      background: #f9f9f9;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 2;
+flex: 1;
+    }
+
+    .sent {
+      text-align: right;
+      background: #dcf8c6;
+      padding: 10px;
+      margin: 5px;
+      border-radius: 8px;
+      position: relative;
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .sent:hover {
+      transform: scale(1.05);
+    }
+
+    .recv {
+      text-align: left;
+      background: #ffffff;
+      padding: 10px;
+      margin: 5px;
+      border-radius: 8px;
+      position: relative;
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .recv:hover {
+      transform: scale(1.05);
+    }
+
+    .sentiment {
+      font-size: 12px;
+      margin-top: 5px;
+    }
+
+    .sentiment span {
+      transition: opacity 0.3s ease-in-out;
+    }
+
+    #frm {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    #txt {
+      width: 80%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-right: 10px;
+      outline: none;
+    }
+
+    #txt:focus {
+      border-color: #4c6ef5;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #4c6ef5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #3b5bbf;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.1;
+      pointer-events: none;
+    }
+
+
+
+.custom-file-upload {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #4c6ef5;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.custom-file-upload:hover {
+  background-color: #3b5bbf;
+}
+
+  </style>
+</head>
+<body>
+<% layout = false %>
+
+  <div class="chat-container" class="chat-box">
+    <h2>Chat with <%= otherUser.username %></h2>
+
+    <div id="msgs" >
+      <% messages.forEach(m => { 
+  const isSent = String(m.sender) === String(user._id);
+%>
+  <div class="<%= isSent ? 'sent' : 'recv' %>" class="chat-box" style="background-color: var(--chat-bg-color); color: var(--chat-text-color);">
+
+    <% if (m.attachmentPath && m.attachmentType === 'image') { %>
+      <img src="<%= m.attachmentPath %>" alt="Image" style="max-width: 200px; border-radius: 8px;" />
+    <% } else if (m.attachmentPath && m.attachmentType === 'video') { %>
+      <video controls style="max-width: 250px; border-radius: 8px;">
+        <source src="<%= m.attachmentPath %>" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    <% } %>
+
+    <% if (m.message) { %>
+      <p><%= m.message %></p>
+    <% } %>
+
+    <small><%= new Date(m.createdAt).toLocaleTimeString() %></small>
+
+    <div class="sentiment">
+      <% if (m.emotion === 'حب') { %>
+        <span style="color:pink;">💖 Love</span>
+      <% } else if (m.emotion === 'إيجابي') { %>
+        <span style="color:green;">😊 Positive</span>
+      <% } else if (m.emotion === 'ممتن') { %>
+        <span style="color:blue;">🙏 Grateful</span>
+      <% } else if (m.emotion === 'غضب') { %>
+        <span style="color:red;">😡 Angry</span>
+      <% } else if (m.emotion === 'سلبي') { %>
+        <span style="color:red;">😞 Negative</span>
+      <% } else { %>
+        <span style="color:gray;">😊 Be happy</span>
+      <% } %>
+    </div>
+  </div>
+<% }) %>
+
+    </div>
+
+    <form action="/chat/upload/<%= otherUser._id %>" method="POST" enctype="multipart/form-data" class="upload-form">
+  <div class="preview-container" id="previewContainer"></div>
+<!-- زر مخصص -->
+<label for="fileInput" class="custom-file-upload">Choose File</label>
+<input type="file" id="fileInput" name="attachment" accept="image/*,video/*" style="display: none;" />
+<span id="fileName">No file chosen</span>
+
+  <input type="text" name="message" placeholder="Type a message..." />
+  <button type="submit">Send</button>
 </form>
+
+
+
+  </div>
+
+  <canvas id="interactiveCanvas"></canvas>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    const myId = '<%= user._id %>';
+    const otherId = '<%= otherUser._id %>';
+    const convId = '<%= conversation._id %>';
+
+    socket.emit('register', myId);
+    socket.emit('joinConv', convId);
+
+    
+
+      socket.on('newMsg', m => {
+  const div = document.createElement('div');
+  div.className = String(m.sender) === myId ? 'sent' : 'recv';
+
+  // ✅ استخدام متغيرات CSS مباشرة
+  div.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--chat-bg-color');
+  div.style.color = getComputedStyle(document.documentElement).getPropertyValue('--chat-text-color');
+function linkify(text) {
+  const urlPattern = /(\bhttps?:\/\/[^\s]+)/g;
+  return text.replace(urlPattern, url => `<a href="${url}" target="_blank" style="color: blue;">${url}</a>`);
+}
+
+// عند تلقي رسالة جديدة...
+div.innerHTML = linkify(m.message) + ` <small>${new Date(m.createdAt).toLocaleTimeString()}</small>`;
+
+//  div.innerHTML = `${m.message} <small>${new Date(m.createdAt).toLocaleTimeString()}</small>`;
+
+  const sentimentDiv = document.createElement('div');
+  sentimentDiv.classList.add('sentiment');
+
+  if (m.emotion === 'حب') {
+    sentimentDiv.innerHTML = '<span style="color:pink;">💖 Love</span>';
+  } else if (m.emotion === 'إيجابي') {
+    sentimentDiv.innerHTML = '<span style="color:green;">😊 Positive</span>';
+  } else if (m.emotion === 'ممتن') {
+    sentimentDiv.innerHTML = '<span style="color:blue;">🙏 Grateful</span>';
+  } else if (m.emotion === 'غضب') {
+    sentimentDiv.innerHTML = '<span style="color:red;">😡 Angry</span>';
+  } else if (m.emotion === 'سلبي') {
+    sentimentDiv.innerHTML = '<span style="color:red;">😞 Negative</span>';
+  } else {
+    sentimentDiv.innerHTML = '<span style="color:gray;">😐 Neutral</span>';
+  }
+
+  div.appendChild(sentimentDiv);
+  msgsContainer.appendChild(div);
+  msgsContainer.scrollTop = msgsContainer.scrollHeight;
+});
+
+    })();
+
+    // Background Particle Effect
+    const canvas = document.getElementById('interactiveCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    function drawParticles() {
+      const particles = [];
+      for (let i = 0; i < 200; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          size: Math.random() * 3 + 1,
+          speedX: Math.random() * 2 - 1,
+          speedY: Math.random() * 2 - 1,
+          color: 'rgba(72, 88, 235, 0.5)',
+        });
+      }
+
+      function updateParticles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach((particle, index) => {
+          particle.x += particle.speedX;
+          particle.y += particle.speedY;
+
+          if (particle.x < 0 || particle.x > canvas.width || particle.y < 0 || particle.y > canvas.height) {
+            particles[index] = {
+              x: Math.random() * canvas.width,
+              y: Math.random() * canvas.height,
+              size: Math.random() * 3 + 1,
+              speedX: Math.random() * 2 - 1,
+              speedY: Math.random() * 2 - 1,
+              color: 'rgba(72, 88, 235, 0.5)',
+            };
+          }
+
+          ctx.beginPath();
+          ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+          ctx.fillStyle = particle.color;
+          ctx.fill();
+        });
+
+        requestAnimationFrame(updateParticles);
+      }
+
+      updateParticles();
+    }
+
+    drawParticles();
+  </script>
+   
+
+      <script>
+        const theme = <%- JSON.stringify(currentUser?.themeSettings || {}) %>;
+
+for (const [key, val] of Object.entries(theme)) {
+  document.documentElement.style.setProperty('--' + key.replace(/([A-Z])/g, "-$1").toLowerCase(), val);
+}
+
+      </script>
+      <script>
+  // مثال لو كانت إعدادات المستخدم تحتوي على الألوان
+  const themeSettings = {
+    chatTextColor: "#ff6347", // احصل على اللون من السيرفر
+    chatBgColor: "#f5f5f5"
+  };
+
+  // تطبيق اللون في الصفحة بشكل ديناميكي
+  document.documentElement.style.setProperty('--chat-text-color', themeSettings.chatTextColor);
+  document.documentElement.style.setProperty('--chat-bg-color', themeSettings.chatBgColor);
+</script>
+<script>
+  const fileInput = document.getElementById('fileInput');
+  const previewContainer = document.getElementById('previewContainer');
+
+  fileInput.addEventListener('change', function () {
+    const file = this.files[0];
+    previewContainer.innerHTML = ''; // إزالة المعاينة القديمة
+
+    if (!file) return;
+
+    const fileURL = URL.createObjectURL(file);
+
+    if (file.type.startsWith('image/')) {
+      const img = document.createElement('img');
+      img.src = fileURL;
+      previewContainer.appendChild(img);
+    } else if (file.type.startsWith('video/')) {
+      const video = document.createElement('video');
+      video.src = fileURL;
+      video.controls = true;
+      previewContainer.appendChild(video);
+    }
+  });
+
+
+
+document.getElementById('fileInput').addEventListener('change', function () {
+  const file = this.files[0];
+  document.getElementById('fileName').textContent = file ? file.name : 'No file chosen';
+});
+
+</script>
+<style>
+  .upload-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 10px;
+    background-color: #fdfdfd;
+  }
+
+  .upload-form input[type="text"] {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    outline: none;
+    transition: border 0.3s ease;
+  }
+
+  .upload-form input[type="text"]:focus {
+    border-color: #4c6ef5;
+  }
+
+  .upload-form input[type="file"] {
+    padding: 5px;
+  }
+
+  .upload-form button {
+    padding: 10px;
+    background-color: #4c6ef5;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .upload-form button:hover {
+    background-color: #3b5bbf;
+  }
+
+  .preview-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-height: 250px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+
+  .preview-container img,
+  .preview-container video {
+    max-width: 100%;
+    max-height: 250px;
+    border-radius: 10px;
+  }
+</style>
+
+</body>
+</html>
+
+
+
+
+
+
