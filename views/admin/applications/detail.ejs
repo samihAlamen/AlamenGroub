@@ -1,62 +1,103 @@
 <div class="container mt-4">
   <h2>تفاصيل الطلب</h2>
 
+  <!-- الطالب -->
   <h5>الطالب</h5>
   <p>
     <strong><%= application.user?.name || "غير متوفر" %></strong>
     – <%= application.user?.email || "غير متوفر" %>
   </p>
 
+  <!-- المنحة -->
   <h5>المنحة</h5>
   <p><%= application.scholarship?.title || "غير متوفر" %></p>
   <p><%= application.scholarship?.description || "غير متوفر" %></p>
-  <p><strong>المتطلبات:</strong></p>
-  <ul>
-    <% application.scholarship?.requirements.forEach(req => { %>
-      <li><%= req %></li>
-    <% }) %>
-  </ul>
 
-  <p><strong>المستندات المطلوبة:</strong></p>
-  <ul>
-    <% application.scholarship?.documents.forEach(doc => { %>
-      <li><%= doc %></li>
-    <% }) %>
-  </ul>
+  <% if (application.scholarship?.requirements?.length) { %>
+    <p><strong>المتطلبات:</strong></p>
+    <ul>
+      <% application.scholarship.requirements.forEach(req => { %>
+        <li><%= req %></li>
+      <% }) %>
+    </ul>
+  <% } %>
 
-  <p><strong>الموعد النهائي:</strong> <%= application.scholarship?.deadline.toDateString() || "غير متوفر" %></p>
+  <% if (application.scholarship?.documents?.length) { %>
+    <p><strong>المستندات المطلوبة:</strong></p>
+    <ul>
+      <% application.scholarship.documents.forEach(doc => { %>
+        <li><%= doc %></li>
+      <% }) %>
+    </ul>
+  <% } %>
 
-  <hr>
-
-  <!-- عرض إجابات الطالب -->
-  <h4>إجابات الطالب</h4>
-  <% for (let key in application.answers) { %>
-    <div class="mb-2">
-      <strong><%= key %>:</strong>
-      <span><%= application.answers[key] || "لا يوجد إجابة" %></span>
-    </div>
+  <% if (application.scholarship?.deadline) { %>
+    <p><strong>الموعد النهائي:</strong> <%= application.scholarship.deadline.toDateString() %></p>
   <% } %>
 
   <hr>
 
+  <!-- إجابات الطالب العامة -->
+  <% if (application.answers && Object.keys(application.answers).length) { %>
+    <h4>إجابات الطالب</h4>
+    <% for (let key in application.answers) { %>
+      <% if (application.answers[key]) { %>
+        <div class="mb-2">
+          <strong><%= key %>:</strong>
+          <span><%= application.answers[key] %></span>
+        </div>
+      <% } %>
+    <% } %>
+  <% } %>
+
+  <hr>
+
+  <!-- ملفات الطالب -->
+  <% if (application.files && Object.keys(application.files).length) { %>
+    <h4>الملفات المرفقة</h4>
+    <ul>
+      <% for (let key in application.files) { %>
+        <% let file = application.files[key]; %>
+        <% if (file && file.path) { %>
+          <li>
+            <strong><%= key %>:</strong>
+            <a href="/<%= file.path.replace(/^public\//, '') %>" target="_blank">
+              <%= file.originalName %>
+            </a>
+          </li>
+        <% } %>
+      <% } %>
+    </ul>
+    <hr>
+  <% } %>
+
+  <!-- خطوات المنحة -->
   <% if (Array.isArray(application.scholarship?.steps?.steps)) { %>
-    <h4>الخطوات</h4>
-    <% application.scholarship.steps.steps.forEach((step, index) => { %>
-      <h5><%= step.title || "عنوان الخطوة غير متوفر" %></h5>
-      <p><%= step.description || "وصف الخطوة غير متوفر" %></p>
+    <% let steps = application.scholarship.steps.steps; %>
+    <% let hasAnswers = false; %>
 
-      <h6>إجابة الطالب:</h6>
+    <% steps.forEach((step, index) => { %>
       <% let stepAnswer = application.answers[`step_${index + 1}`]; %>
-      <p><%= stepAnswer ? stepAnswer : "لا يوجد إجابة" %></p>
-
-      <hr>
+      <% if (stepAnswer) { hasAnswers = true; } %>
     <% }) %>
-  <% } else { %>
-    <p class="text-muted">لا توجد خطوات لهذه المنحة</p>
+
+    <% if (hasAnswers) { %>
+      <h4>الخطوات</h4>
+      <% steps.forEach((step, index) => { %>
+        <% let stepAnswer = application.answers[`step_${index + 1}`]; %>
+        <% if (stepAnswer) { %>
+          <h5><%= step.title || "عنوان الخطوة غير متوفر" %></h5>
+          <p><%= step.description || "وصف الخطوة غير متوفر" %></p>
+
+          <h6>إجابة الطالب:</h6>
+          <p><%= stepAnswer %></p>
+          <hr>
+        <% } %>
+      <% }) %>
+    <% } %>
   <% } %>
 
-  <hr>
-
+  <!-- أزرار الإدارة -->
   <% if (application.status === "pending") { %>
     <form method="POST" action="/admin/applications/<%= application._id %>/approve" style="display:inline">
       <button class="btn btn-success">قبول</button>
