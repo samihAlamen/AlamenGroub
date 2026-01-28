@@ -4,41 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %> | منصة المنح الدراسية</title>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/bootstrap.min.css">
+   
 </head>
 <body>
-    <!-- Header -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container">
-            <a class="navbar-brand" href="/">منصة المنح الدراسية</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/">الصفحة الرئيسية</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/auth/login">تسجيل الدخول</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+  
 
-    <!-- Flash messages -->
-    <% if (error_msg) { %>
-        <div class="alert alert-danger" role="alert">
-            <%= error_msg %>
-        </div>
-    <% } %>
-    <% if (success_msg) { %>
-        <div class="alert alert-success" role="alert">
-            <%= success_msg %>
-        </div>
-    <% } %>
 
     <!-- Registration Form -->
     <div class="container mt-5">
@@ -63,15 +33,68 @@
             <button type="submit" class="btn btn-primary">تسجيل</button>
         </form>
         <p class="mt-3">لديك حساب بالفعل؟ <a href="/auth/login">تسجيل الدخول</a></p>
+<!-- ✅ زر تسجيل الدخول عبر منصتك -->
+<div id="myplatform-oauth"></div>
+
+<script>
+(function() {
+  // ==========================
+  // تكوين الزر
+  // ==========================
+  const CLIENT_ID = 'YOUR_CLIENT_ID'; // استبدل بمعرف التطبيق الخاص بك
+  const REDIRECT_URI = 'https://example.com/callback'; // رابط إعادة التوجيه
+  const BUTTON_TEXT = 'Sign in with MyPlatform';
+  const BUTTON_COLOR = '#4f46e5';
+  const BUTTON_HOVER_COLOR = '#3730a3';
+  const LOGO_URL = 'https://yourdomain.com/assets/logo.png'; // شعار منصتك
+
+  // ==========================
+  // توليد قيمة state عشوائية
+  // ==========================
+  function generateState(length = 16) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  }
+
+  const state = generateState(20);
+
+  // ==========================
+  // إنشاء الرابط
+  // ==========================
+  const oauthUrl = `https://yourdomain.com/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&state=${state}`;
+
+  // ==========================
+  // إنشاء الزر
+  // ==========================
+  const container = document.getElementById('myplatform-oauth');
+  const btn = document.createElement('a');
+  btn.href = oauthUrl;
+  btn.innerHTML = `<img src="${LOGO_URL}" alt="Logo" style="height:24px;width:24px;margin-right:10px;vertical-align:middle"/>${BUTTON_TEXT}`;
+  btn.style.display = 'inline-flex';
+  btn.style.alignItems = 'center';
+  btn.style.padding = '10px 20px';
+  btn.style.backgroundColor = BUTTON_COLOR;
+  btn.style.color = 'white';
+  btn.style.textDecoration = 'none';
+  btn.style.fontWeight = '600';
+  btn.style.borderRadius = '6px';
+  btn.style.transition = 'background 0.3s';
+  
+  btn.addEventListener('mouseover', () => btn.style.backgroundColor = BUTTON_HOVER_COLOR);
+  btn.addEventListener('mouseout', () => btn.style.backgroundColor = BUTTON_COLOR);
+
+  container.appendChild(btn);
+})();
+</script>
+
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-light py-3 mt-5">
-        <div class="container text-center">
-            <p>&copy; 2023 منصة المنح الدراسية. جميع الحقوق محفوظة.</p>
-        </div>
-    </footer>
+   
 
-    <script src="/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
