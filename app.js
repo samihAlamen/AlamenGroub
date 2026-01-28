@@ -8,6 +8,7 @@ const session = require('express-session');
 const flash = require('connect-flash');
 const dotenv = require('dotenv');
 const expressLayouts = require('express-ejs-layouts');
+const http = require('http');
 const { Server } = require('socket.io');
 
 // تحميل إعدادات البيئة
@@ -17,7 +18,7 @@ dotenv.config();
 const dbConnect = require('./config/db');
 dbConnect();
 
-// استدعاء الموديلات (اختياري)
+// موديلات (اختياري)
 const User = require('./models/User');
 
 // ==================== Routes ====================
@@ -31,6 +32,18 @@ const notificationsRouter = require('./routes/notifications');
 
 // ==================== Express ====================
 const app = express();
+
+// ==================== HTTP Server + Socket.io ====================
+const server = http.createServer(app); // مهم! السيرفر الذي سيستخدمه Socket.io
+const io = new Server(server, {
+    cors: {
+        origin: "*", // ضع هنا دومين موقعك إذا تريد تقييد
+        methods: ["GET", "POST"]
+    }
+});
+
+// ربط Socket.io مع ملف السوكيت
+require('./sockets/chatSocket')(io);
 
 // ==================== View Engine ====================
 app.set('view engine', 'ejs');
@@ -79,18 +92,8 @@ app.use((req, res) => {
     res.status(404).render('404', { title: 'Page Not Found', layout: 'layouts/main' });
 });
 
-// ==================== Socket.io ====================
-// ربط Socket.io مع Express app مباشرة
-const io = new Server(app, {
-    cors: {
-        origin: "*", // يمكنك تغييره لدومين موقعك
-        methods: ["GET", "POST"]
-    }
-});
-require('./sockets/chatSocket')(io);
-
 // ==================== بدء السيرفر ====================
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
