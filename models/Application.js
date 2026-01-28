@@ -15,6 +15,10 @@ const ApplicationSchema = new mongoose.Schema({
     type: Object,
     default: {}
   },
+  stepsAnswers: {  
+    type: [Object],
+    default: []
+  },
   files: {
     type: Object,
     default: {}
@@ -36,3 +40,4 @@ const ApplicationSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model("Application", ApplicationSchema);
+
