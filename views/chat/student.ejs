@@ -21,12 +21,20 @@
     socket.emit('joinConversation', conversationId);
 
     document.getElementById('sendBtn').addEventListener('click', () => {
-        const text = document.getElementById('messageInput').value;
-        if (text.trim() === '') return;
+    const text = document.getElementById('messageInput').value;
+    if (text.trim() === '') return;
 
-        socket.emit('sendMessage', { conversationId, senderId: userId, text });
-        document.getElementById('messageInput').value = '';
-    });
+    // تحقق من وجود userId وتأكد من أنه ليس فارغًا
+    if (!userId || userId.trim() === '') {
+        console.error('Invalid senderId');
+        return;
+    }
+
+    // إرسال الرسالة عبر socket
+    socket.emit('sendMessage', { conversationId, senderId: userId, text });
+    document.getElementById('messageInput').value = '';
+});
+
 
     socket.on('newMessage', (msg) => {
         const msgDiv = document.createElement('div');
@@ -35,4 +43,5 @@
         document.getElementById('messages').appendChild(msgDiv);
     });
 </script>
+
 
