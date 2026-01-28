@@ -10,6 +10,8 @@ const dotenv = require('dotenv');
 const expressLayouts = require('express-ejs-layouts');
 const http = require('http');
 const { Server } = require('socket.io');
+const chatRoutes = require('./routes/chats');
+const contactRouter = require('./routes/contact');
 
 // تحميل إعدادات البيئة
 dotenv.config();
@@ -86,7 +88,8 @@ app.use('/admin/chat', adminChatRoutes); // دردشة الإدمن
 app.use('/notifications', notificationsRouter);
 app.use('/profile', require('./routes/profile'));
 app.use('/admin', require('./routes/admin'));
-
+app.use('/', chatRoutes);
+app.use('/contact', contactRouter);
 // ==================== صفحة 404 ====================
 app.use((req, res) => {
     res.status(404).render('404', { title: 'Page Not Found', layout: 'layouts/main' });
@@ -97,3 +100,4 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
+
