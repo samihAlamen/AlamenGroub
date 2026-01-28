@@ -1,6 +1,15 @@
-<h2>رسائل الطلاب</h2>
-<% conversations.forEach(c => { %>
-  <a href="/admin/chat/<%= c._id %>">
-    <p><%= c.student.name %> - <%= c.lastMessage %></p>
-  </a>
-<% }) %>
+<%- include('../layouts/main') %>
+
+<h3>قائمة المحادثات</h3>
+<ul>
+    <% conversations.forEach(conv => { %>
+        <li>
+            <a href="/admin/chat/<%= conv._id %>">
+                محادثة مع 
+                <% conv.participants.forEach(p => { if(p.role === 'student'){ %>
+                    <%= p.name %>
+                <% }}) %>
+            </a>
+        </li>
+    <% }) %>
+</ul>
