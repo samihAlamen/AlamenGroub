@@ -1,29 +1,38 @@
-<h2>الدردشة مع الإدارة</h2>
+<%- include('../layouts/main') %>
 
-<div id="messages">
-  <% messages.forEach(m => { %>
-    <p><b><%= m.sender.name %>:</b> <%= m.content %></p>
-  <% }) %>
+<div class="chat-container">
+    <h3>دردش مع الإدارة</h3>
+    <div id="messages">
+        <% messages.forEach(msg => { %>
+            <div class="<%= msg.sender._id.toString() === user._id.toString() ? 'my-message' : 'admin-message' %>">
+                <strong><%= msg.sender.name %>:</strong> <%= msg.text %>
+            </div>
+        <% }) %>
+    </div>
+    <input type="text" id="messageInput" placeholder="اكتب رسالتك هنا">
+    <button id="sendBtn">إرسال</button>
 </div>
-
-<input id="msg" placeholder="اكتب رسالتك">
-<button onclick="send()">إرسال</button>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  const socket = io();
-  const conversationId = "<%= conversation._id %>";
-  const userId = "<%= user._id %>";
+    const socket = io();
+    const conversationId = '<%= conversation._id %>';
+    const userId = '<%= user._id %>';
 
-  socket.emit('joinConversation', conversationId);
+    socket.emit('joinConversation', conversationId);
 
-  socket.on('newMessage', msg => {
-    document.getElementById('messages').innerHTML += `<p><b>${msg.sender}:</b> ${msg.content}</p>`;
-  });
+    document.getElementById('sendBtn').addEventListener('click', () => {
+        const text = document.getElementById('messageInput').value;
+        if (text.trim() === '') return;
 
-  function send() {
-    const content = document.getElementById('msg').value;
-    socket.emit('sendMessage', { conversationId, senderId: userId, content });
-    document.getElementById('msg').value = '';
-  }
+        socket.emit('sendMessage', { conversationId, senderId: userId, text });
+        document.getElementById('messageInput').value = '';
+    });
+
+    socket.on('newMessage', (msg) => {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = msg.sender._id === userId ? 'my-message' : 'admin-message';
+        msgDiv.innerHTML = `<strong>${msg.sender.name}:</strong> ${msg.text}`;
+        document.getElementById('messages').appendChild(msgDiv);
+    });
 </script>
