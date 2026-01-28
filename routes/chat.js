@@ -5,7 +5,7 @@ const Message = require('../models/Message');
 const { ensureAuth } = require('../middlewares/auth');
 
 // صفحة الدردشة للطالب
-router.get('/', ensureAuth, async (req, res) => {
+router.get('/student', ensureAuth, async (req, res) => {
     try {
         let conversation = await Conversation.findOne({ participants: req.user._id });
         if (!conversation) {
@@ -24,4 +24,5 @@ router.get('/', ensureAuth, async (req, res) => {
 // صفحة الدردشة للطالب
 
 module.exports = router;
+
 
