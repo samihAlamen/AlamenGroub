@@ -30,12 +30,28 @@
 
   <% if (Array.isArray(application.scholarship?.steps?.steps)) { %>
     <h4>الخطوات</h4>
-    <% application.scholarship.steps.steps.forEach(step => { %>
+    <% application.scholarship.steps.steps.forEach((step, index) => { %>
       <h5><%= step.title || "عنوان الخطوة غير متوفر" %></h5>
       <p><%= step.description || "وصف الخطوة غير متوفر" %></p>
+
+      <hr>
     <% }) %>
   <% } else { %>
     <p class="text-muted">لا توجد خطوات لهذه المنحة</p>
+  <% } %>
+
+  <hr>
+
+  <h4>إجابات الطالب:</h4>
+  <% if (application.answers) { %>
+    <% Object.keys(application.answers).forEach(field => { %>
+      <div class="mb-2">
+        <strong><%= field %>:</strong>
+        <%= application.answers[field] || "غير متوفر" %>
+      </div>
+    <% }) %>
+  <% } else { %>
+    <p>لم يقم الطالب بتقديم أي إجابات بعد.</p>
   <% } %>
 
   <hr>
