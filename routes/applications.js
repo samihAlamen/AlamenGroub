@@ -65,61 +65,61 @@ router.get('/apply/:scholarshipId', ensureAuth, ensureRole('user'), async (req, 
     }
 });
 
-// معالجة تقديم الطلب مع رفع الملفات
-router.post(
-  '/apply/:scholarshipId',
-  ensureAuth,
-  ensureRole('user'),
-  upload.any(),
-  async (req, res) => {
-    try {
-      const scholarship = await Scholarship.findById(req.params.scholarshipId);
-      if (!scholarship) {
-        req.flash('error_msg', 'المنحة غير موجودة');
-        return res.redirect('/scholarships');
-      }
+router.post('/apply/:scholarshipId', ensureAuth, ensureRole('user'), upload.any(), async (req, res) => {
+  try {
+    const scholarship = await Scholarship.findById(req.params.scholarshipId);
+    if (!scholarship) {
+      req.flash('error_msg', 'المنحة غير موجودة');
+      return res.redirect('/scholarships');
+    }
 
-      const exists = await Application.findOne({
-        user: req.session.user.id,
-        scholarship: scholarship._id
-      });
-      if (exists) {
-        req.flash('error_msg', 'سبق لك التقديم على هذه المنحة');
-        return res.redirect('/applications');
-      }
+    const exists = await Application.findOne({
+      user: req.session.user.id,
+      scholarship: scholarship._id
+    });
+    if (exists) {
+      req.flash('error_msg', 'سبق لك التقديم على هذه المنحة');
+      return res.redirect('/applications');
+    }
 
-      const answers = {};
-      const files = {};
+    const answers = {};
+    const files = {};
+    const stepsAnswers = [];  // تخزين إجابات الطالب عن الخطوات
 
-      for (const key in req.body) {
+    // جمع الإجابات
+    for (const key in req.body) {
+      if (key.startsWith('step_')) {  // إذا كان المفتاح يحتوي على step_
+        stepsAnswers.push({ step: key, answer: req.body[key] });
+      } else {
         answers[key] = req.body[key];
       }
-
-      (req.files || []).forEach(file => {
-        files[file.fieldname] = {
-          originalName: file.originalname,
-          path: file.path
-        };
-      });
-
-      await Application.create({
-        user: req.session.user.id,
-        scholarship: scholarship._id,
-        answers,
-        files,
-        status: 'pending'
-      });
-
-      req.flash('success_msg', 'تم تقديم الطلب بنجاح');
-      res.redirect('/applications');
-
-    } catch (err) {
-      console.error(err);
-      req.flash('error_msg', 'حدث خطأ أثناء تقديم الطلب');
-      res.redirect(`/applications/apply/${req.params.scholarshipId}`);
     }
+
+    (req.files || []).forEach(file => {
+      files[file.fieldname] = {
+        originalName: file.originalname,
+        path: file.path
+      };
+    });
+
+    await Application.create({
+      user: req.session.user.id,
+      scholarship: scholarship._id,
+      answers,
+      stepsAnswers,  // إضافة إجابات الطالب عن الخطوات
+      files,
+      status: 'pending'
+    });
+
+    req.flash('success_msg', 'تم تقديم الطلب بنجاح');
+    res.redirect('/applications');
+
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'حدث خطأ أثناء تقديم الطلب');
+    res.redirect(`/applications/apply/${req.params.scholarshipId}`);
   }
-);
+});
 
 // تحديث حالة الطلب (للأدمن والموظف)
 router.post('/update-status/:id', ensureAuth, ensureRole(['admin', 'staff']), async (req, res) => {
@@ -136,3 +136,4 @@ router.post('/update-status/:id', ensureAuth, ensureRole(['admin', 'staff']), as
 });
 
 module.exports = router;
+
