@@ -1,0 +1,16 @@
+
+<h1>الإشعارات</h1>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <ul>
+            <% notifications.forEach(notification => { %>
+                <li class="notification <%= notification.read ? 'read' : 'unread' %>">
+                    <strong><%= notification.type %>:</strong>
+                    <p><%= notification.message %></p>
+                    <span class="text-muted"><%= new Date(notification.createdAt).toLocaleString() %></span>
+                </li>
+            <% }) %>
+        </ul>
+    </div>
+</div>

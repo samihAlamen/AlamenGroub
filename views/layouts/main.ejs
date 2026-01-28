@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title><%= title || 'منصة تسجيل الجامعات والإقامات' %></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+
+    <!-- Custom Style -->
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- ================= HEADER ================= -->
+<header class="main-header shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+
+            <a class="navbar-brand fw-bold" href="/">
+                🎓 AL-AMEN GROUP 
+                <br>
+                MANAGER
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">الرئيسية</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/scholarships">المنح الدراسية</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">عن المكتب</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contact">تواصل معنا</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/chat">الدردشة المباشرة</a>
+                    </li>
+                </ul>
+
+                <!-- ===== User Area ===== -->
+                <% if(currentUser){ %>
+                    <div class="d-flex align-items-center gap-2">
+
+                        <span class="text-white small">
+                            مرحبًا، <strong><%= currentUser.name %></strong>
+                        </span>
+
+                        <% if(currentUser.role === 'admin'){ %>
+                            <a href="/admin/dashboard" class="btn btn-warning btn-sm">
+                                لوحة التحكم
+                            </a>
+                        <% } %>
+
+                        <a href="/notifications" class="btn btn-outline-light btn-sm">
+                            🔔
+                        </a>
+
+                        <a href="/auth/logout" class="btn btn-light btn-sm">
+                            تسجيل الخروج
+                        </a>
+                    </div>
+                <% } else { %>
+                    <div class="d-flex gap-2">
+                        <a href="/auth/login" class="btn btn-light btn-sm">تسجيل الدخول</a>
+                        <a href="/auth/register" class="btn btn-outline-light btn-sm">إنشاء حساب</a>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<!-- ================= NOTIFICATIONS ================= -->
+<div class="container mt-3">
+
+    <% if(success_msg && success_msg.length > 0){ %>
+        <div class="alert alert-success alert-dismissible fade show">
+            <%= success_msg[0] %>
+            <button class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <% } %>
+
+    <% if(error_msg && error_msg.length > 0){ %>
+        <div class="alert alert-danger alert-dismissible fade show">
+            <%= error_msg[0] %>
+            <button class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <% } %>
+
+</div>
+
+
+<!-- ================= PAGE CONTENT ================= -->
+<main class="container my-4">
+    <%- body %>
+</main>
+
+<!-- ================= FOOTER ================= -->
+<footer class="main-footer mt-5">
+    <div class="container">
+        <div class="row">
+
+            <div class="col-md-4 mb-3">
+                <h5>عن المكتب</h5>
+                <p>
+                    مكتب متخصص في تسجيل الجامعات، المنح الدراسية، 
+                    والإقامات الطلابية في إسطنبول.
+                </p>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <h5>روابط سريعة</h5>
+                <ul class="list-unstyled">
+                    <li><a href="/scholarships">المنح الدراسية</a></li>
+                    <li><a href="/applications">تتبع الطلبات</a></li>
+                    <li><a href="/chat">الدردشة</a></li>
+                    <li><a href="/privacy">سياسة الخصوصية</a></li>
+                </ul>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <h5>الدعم والتواصل</h5>
+                <p>📍 إسطنبول – تركيا</p>
+                <p>📧 info@office.com</p>
+                <p>💳 دعم المكتب عبر Binance</p>
+            </div>
+
+        </div>
+
+        <hr class="border-light">
+
+        <div class="text-center small">
+            © 2026 جميع الحقوق محفوظة – منصة تسجيل الجامعات والإقامات
+        </div>
+    </div>
+</footer>
+
+<!-- ================= SCRIPTS ================= -->
+<script src="/js/jquery.min.js"></script>
+<script src="/js/bootstrap.bundle.min.js"></script>
+<script src="/js/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+</body>
+</html>

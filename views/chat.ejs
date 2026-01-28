@@ -1,0 +1,21 @@
+<h1>الدردشة مع الإدارة</h1>
+
+<div id="chat-messages" style="height:400px; overflow-y:auto;">
+    <% messages.forEach(message => { %>
+        <div class="<%= message.sender && message.sender._id.toString() === user.id.toString() ? 'sent' : 'received' %>">
+            <strong>
+              <%= message.sender.name %>
+              <% if (message.sender.role === 'admin') { %>
+                (الإدارة)
+              <% } %>
+            </strong>
+            <p><%= message.content %></p>
+            <small><%= new Date(message.createdAt).toLocaleString() %></small>
+        </div>
+    <% }) %>
+</div>
+
+<form action="/chat/send" method="POST">
+    <textarea name="content" required placeholder="اكتب رسالتك..."></textarea>
+    <button type="submit">إرسال</button>
+</form>

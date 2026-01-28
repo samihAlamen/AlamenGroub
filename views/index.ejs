@@ -1,0 +1,24 @@
+
+<h1 class="text-center mb-4">أحدث المنح الدراسية</h1>
+
+<div class="row">
+    <% if (scholarships.length === 0) { %>
+        <p class="text-center">لا توجد منح دراسية متاحة حالياً.</p>
+    <% } else { %>
+        <% scholarships.forEach(scholarship => { %>
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <img src="/images/scholarship.jpg" class="card-img-top" alt="صورة المنحة">
+                    <div class="card-body">
+                        <h5 class="card-title"><%= scholarship.title %></h5>
+                        <p class="card-text"><%= scholarship.description.substring(0, 100) %>...</p>
+                        <a href="/scholarships/<%= scholarship._id %>" class="btn btn-primary">اقرأ المزيد</a>
+                        <% if (user) { %>
+                            <a href="/applications/apply/<%= scholarship._id %>" class="btn btn-success">قدم الآن</a>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        <% }) %>
+    <% } %>
+</div>

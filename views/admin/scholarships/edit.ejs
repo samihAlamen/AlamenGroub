@@ -1,0 +1,71 @@
+
+<div class="container mt-4">
+  <h2>تعديل منحة</h2>
+
+  <form method="POST" action="/admin/scholarships/<%= scholarship._id %>/edit" onsubmit="prepareSteps()">
+    <div class="mb-3">
+      <label>العنوان</label>
+      <input type="text" name="title" class="form-control" value="<%= scholarship.title %>">
+    </div>
+
+    <div class="mb-3">
+      <label>الوصف</label>
+      <textarea name="description" class="form-control"><%= scholarship.description %></textarea>
+    </div>
+
+    <div class="mb-3">
+      <label>آخر موعد</label>
+      <input type="date" name="deadline" class="form-control"
+        value="<%= scholarship.deadline?.toISOString().substring(0,10) %>">
+    </div>
+
+    <label>
+      <input type="checkbox" name="isActive" <%= scholarship.isActive ? "checked" : "" %>>
+      مفعّلة
+    </label>
+
+    <div id="steps"></div>
+
+    <input type="hidden" name="steps" id="stepsInput">
+
+    <button class="btn btn-success mt-3">تحديث</button>
+  </form>
+</div>
+
+<script>
+let steps = <%- JSON.stringify(scholarship.steps || []) %>;
+
+function renderSteps() {
+  const container = document.getElementById("steps");
+  container.innerHTML = "";
+
+  steps.forEach((step, sIndex) => {
+    container.innerHTML += `
+      <div class="card mt-3 p-3">
+        <input class="form-control mb-2"
+          value="${step.title}"
+          oninput="steps[${sIndex}].title=this.value">
+
+        ${step.fields.map((f, fIndex) => `
+          <div class="border p-2 mb-2">
+            <input class="form-control mb-1"
+              value="${f.label}"
+              oninput="steps[${sIndex}].fields[${fIndex}].label=this.value">
+
+            <input class="form-control mb-1"
+              value="${f.name}"
+              oninput="steps[${sIndex}].fields[${fIndex}].name=this.value">
+          </div>
+        `).join("")}
+      </div>
+    `;
+  });
+}
+
+function prepareSteps() {
+  document.getElementById("stepsInput").value = JSON.stringify(steps);
+}
+
+renderSteps();
+</script>
+

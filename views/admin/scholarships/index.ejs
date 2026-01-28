@@ -1,0 +1,42 @@
+
+<div class="container mt-4">
+  <h2>إدارة المنح</h2>
+
+  <a href="/admin/scholarships/create" class="btn btn-success mb-3">
+    + إنشاء منحة جديدة
+  </a>
+
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>العنوان</th>
+        <th>آخر موعد</th>
+        <th>الحالة</th>
+        <th>إجراءات</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% scholarships.forEach(s => { %>
+        <tr>
+          <td><%= s.title %></td>
+          <td><%= s.deadline?.toDateString() || '-' %></td>
+          <td><%= s.isActive ? 'مفعلة' : 'موقوفة' %></td>
+          <td>
+            <a href="/admin/scholarships/<%= s._id %>/edit" class="btn btn-sm btn-primary">
+              تعديل
+            </a>
+
+            <form method="POST"
+              action="/admin/scholarships/<%= s._id %>/delete"
+              style="display:inline">
+              <button class="btn btn-sm btn-danger">
+                حذف
+              </button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+

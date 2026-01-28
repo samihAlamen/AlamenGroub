@@ -1,0 +1,17 @@
+<h2>بروفايلي</h2>
+
+<img src="/uploads/<%= user.profile.avatar %>" width="120">
+
+<p>الاسم: <%= user.name %></p>
+<p>البريد: <%= user.email %></p>
+<p>الجامعة: <%= user.profile.university %></p>
+
+<h3>المنح المقدّم عليها</h3>
+<ul>
+  <% user.appliedScholarships.forEach(app => { %>
+    <li>
+      <%= app.scholarship.title %> - 
+      <strong><%= app.status %></strong>
+    </li>
+  <% }) %>
+</ul>

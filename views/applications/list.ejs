@@ -1,0 +1,27 @@
+
+<h1><%= title %></h1>
+
+<% if (applications.length === 0) { %>
+    <p>لا توجد طلبات حتى الآن.</p>
+<% } else { %>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>المستخدم</th>
+                <th>المنحة</th>
+                <th>تاريخ التقديم</th>
+                <th>الحالة</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% applications.forEach(app => { %>
+                <tr>
+                    <td><%= app.user.name %></td>
+<td><%= app.scholarship ? app.scholarship.title : 'غير محدد' %></td>
+                    <td><%= app.createdAt.toLocaleDateString() %></td>
+                    <td><%= app.status || 'قيد المراجعة' %></td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+<% } %>

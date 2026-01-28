@@ -1,0 +1,34 @@
+
+<div class="container mt-4">
+  <h2>طلبات الطلاب</h2>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>الطالب</th>
+        <th>المنحة</th>
+        <th>الحالة</th>
+        <th>تاريخ التقديم</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% applications.forEach(app => { %>
+        <tr>
+         <td><%= app.user ? app.user.name : "غير متوفر" %></td>
+<td><%= app.scholarship ? app.scholarship.title : "غير متوفر" %></td>
+<td><%= app.status ? app.status : "غير محدد" %></td>
+<td><%= app.createdAt ? app.createdAt.toDateString() : "غير متوفر" %></td>
+
+
+          <td>
+            <a href="/admin/applications/<%= app._id %>" class="btn btn-sm btn-info">
+              عرض
+            </a>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+

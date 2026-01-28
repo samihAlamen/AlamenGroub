@@ -1,0 +1,36 @@
+
+<h1 class="mb-4">مرحباً، <%= user.name %>!</h1>
+
+<div class="row">
+    <div class="col-md-4 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">المنح الدراسية</h5>
+                <p class="card-text">تصفح المنح الدراسية المتاحة وقدم طلبك.</p>
+                <a href="/scholarships" class="btn btn-primary">عرض المنح</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">طلباتي</h5>
+                <p class="card-text">تابع حالة طلباتك المقدمة للمنح الدراسية.</p>
+                <a href="/applications" class="btn btn-success">عرض الطلبات</a>
+            </div>
+        </div>
+    </div>
+
+    <% if (user.role === 'admin' || user.role === 'staff') { %>
+    <div class="col-md-4 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">إدارة النظام</h5>
+                <p class="card-text">إدارة المنح الدراسية، الطلبات، والإشعارات.</p>
+                <a href="/scholarships" class="btn btn-warning">إدارة المنح</a>
+            </div>
+        </div>
+    </div>
+    <% } %>
+</div>

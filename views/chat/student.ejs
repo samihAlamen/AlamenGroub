@@ -1,0 +1,29 @@
+<h2>الدردشة مع الإدارة</h2>
+
+<div id="messages">
+  <% messages.forEach(m => { %>
+    <p><b><%= m.sender.name %>:</b> <%= m.content %></p>
+  <% }) %>
+</div>
+
+<input id="msg" placeholder="اكتب رسالتك">
+<button onclick="send()">إرسال</button>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  const conversationId = "<%= conversation._id %>";
+  const userId = "<%= user._id %>";
+
+  socket.emit('joinConversation', conversationId);
+
+  socket.on('newMessage', msg => {
+    document.getElementById('messages').innerHTML += `<p><b>${msg.sender}:</b> ${msg.content}</p>`;
+  });
+
+  function send() {
+    const content = document.getElementById('msg').value;
+    socket.emit('sendMessage', { conversationId, senderId: userId, content });
+    document.getElementById('msg').value = '';
+  }
+</script>

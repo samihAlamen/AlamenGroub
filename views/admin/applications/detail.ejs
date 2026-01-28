@@ -1,0 +1,54 @@
+<div class="container mt-4">
+  <h2>تفاصيل الطلب</h2>
+
+  <h5>الطالب</h5>
+  <p>
+    <strong><%= application.user?.name || "غير متوفر" %></strong>
+    – <%= application.user?.email || "غير متوفر" %>
+  </p>
+
+  <h5>المنحة</h5>
+  <p><%= application.scholarship?.title || "غير متوفر" %></p>
+
+  <hr>
+
+  <% if (Array.isArray(application.scholarship?.steps)) { %>
+
+    <% application.scholarship.steps.forEach(step => { %>
+      <h4><%= step.title || "" %></h4>
+
+      <% if (Array.isArray(step.fields)) { %>
+        <% step.fields.forEach(field => { %>
+          <div class="mb-2">
+            <strong><%= field.label || "" %>:</strong>
+
+            <% if (field.type === "file") { %>
+              <% if (application.answers?.[field.name]) { %>
+                <a href="/<%= application.answers[field.name] %>" target="_blank">
+                  تحميل الملف
+                </a>
+              <% } else { %>
+                <span>-</span>
+              <% } %>
+            <% } else { %>
+              <span><%= application.answers?.[field.name] || "-" %></span>
+            <% } %>
+          </div>
+        <% }) %>
+      <% } %>
+
+      <hr>
+    <% }) %>
+
+  <% } else { %>
+    <p class="text-muted">لا توجد خطوات لهذه المنحة</p>
+  <% } %>
+
+  <form method="POST" action="/admin/applications/<%= application._id %>/approve" style="display:inline">
+    <button class="btn btn-success">قبول</button>
+  </form>
+
+  <form method="POST" action="/admin/applications/<%= application._id %>/reject" style="display:inline">
+    <button class="btn btn-danger">رفض</button>
+  </form>
+</div>

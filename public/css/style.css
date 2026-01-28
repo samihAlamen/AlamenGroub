@@ -1,0 +1,63 @@
+body {
+    font-family: 'Cairo', sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* ===== HEADER ===== */
+.main-header .navbar-brand {
+    font-size: 1.2rem;
+}
+
+.navbar .nav-link {
+    font-size: 0.95rem;
+    margin-left: 10px;
+}
+
+/* ===== FOOTER ===== */
+.main-footer {
+    background-color: #212529;
+    color: #fff;
+    padding: 40px 0;
+}
+
+.main-footer h5 {
+    font-size: 1rem;
+    margin-bottom: 15px;
+}
+
+.main-footer a {
+    color: #ddd;
+    text-decoration: none;
+}
+
+.main-footer a:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
+.main-footer p {
+    font-size: 0.9rem;
+}
+
+/* ===== CARDS ===== */
+.card-scholarship img {
+    height: 180px;
+    object-fit: cover;
+}
+
+/* ===== CHAT ===== */
+.chat-box {
+    background: #fff;
+    border-radius: 6px;
+    padding: 15px;
+    height: 400px;
+    overflow-y: auto;
+}
+
+/* ===== MULTI STEP FORM ===== */
+.step {
+    display: none;
+}
+.step.active {
+    display: block;
+}

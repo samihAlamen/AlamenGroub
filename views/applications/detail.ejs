@@ -1,0 +1,46 @@
+
+<h1>تفاصيل الطلب - <%= application.scholarship.title %></h1>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <h5 class="card-title">المعلومات الشخصية</h5>
+        <p><strong>الاسم الكامل:</strong> <%= application.fullName %></p>
+        <p><strong>رقم جواز السفر:</strong> <%= application.passportNumber %></p>
+
+        <h5 class="mt-3">المستندات المرفوعة</h5>
+        <ul>
+            <% application.documents.forEach(doc => { %>
+                <li><%= doc %></li>
+            <% }) %>
+        </ul>
+
+        <h5 class="mt-3">حالة الطلب:</h5>
+        <p><%= application.status %></p>
+
+        <h5 class="mt-3">التعليقات</h5>
+        <ul>
+            <% application.comments.forEach(comment => { %>
+                <li><%= comment %></li>
+            <% }) %>
+        </ul>
+
+        <% if (user.role === 'admin' || user.role === 'staff') { %>
+            <form action="/applications/update/<%= application._id %>" method="POST">
+                <div class="mb-3">
+                    <label for="status" class="form-label">تغيير الحالة</label>
+                    <select name="status" id="status" class="form-control">
+                        <option value="قيد المراجعة" <%= application.status === 'قيد المراجعة' ? 'selected' : '' %>>قيد المراجعة</option>
+                        <option value="بانتظار الدفع" <%= application.status === 'بانتظار الدفع' ? 'selected' : '' %>>بانتظار الدفع</option>
+                        <option value="مكتمل" <%= application.status === 'مكتمل' ? 'selected' : '' %>>مكتمل</option>
+                        <option value="مرفوض" <%= application.status === 'مرفوض' ? 'selected' : '' %>>مرفوض</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">تحديث الحالة</button>
+            </form>
+        <% } %>
+    </div>
+</div>
+
+<% if (user) { %>
+    <a href="/chat" class="btn btn-secondary">التواصل مع الفريق</a>
+<% } %>

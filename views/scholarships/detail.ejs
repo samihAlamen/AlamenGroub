@@ -1,0 +1,26 @@
+
+<h1><%= scholarship.title %></h1>
+<p><%= scholarship.description %></p>
+
+<h3>الشروط:</h3>
+<ul>
+    <% scholarship.requirements.forEach(req => { %>
+        <li><%= req %></li>
+    <% }) %>
+</ul>
+
+<h3>المستندات المطلوبة:</h3>
+<ul>
+    <% scholarship.documents.forEach(doc => { %>
+        <li><%= doc %></li>
+    <% }) %>
+</ul>
+
+<h3>الموعد النهائي:</h3>
+<p><%= scholarship.deadline.toLocaleDateString() %></p>
+
+<% if (user) { %>
+    <a href="/applications/apply/<%= scholarship._id %>" class="btn btn-success">قدم الآن</a>
+<% } else { %>
+    <p>يرجى تسجيل الدخول لتقديم الطلب</p>
+<% } %>

@@ -1,0 +1,6 @@
+<h2>رسائل الطلاب</h2>
+<% conversations.forEach(c => { %>
+  <a href="/admin/chat/<%= c._id %>">
+    <p><%= c.student.name %> - <%= c.lastMessage %></p>
+  </a>
+<% }) %>

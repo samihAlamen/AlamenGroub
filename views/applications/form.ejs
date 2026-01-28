@@ -1,0 +1,55 @@
+<div class="container mt-4">
+  <h2>التقديم على: <%= scholarship.title %></h2>
+
+  <form method="POST"
+        action="/applications/apply/<%= scholarship._id %>"
+        enctype="multipart/form-data">
+
+    <% const stepsData = scholarship.steps || {}; %>
+    <% const steps = stepsData.steps || []; %>
+
+    <% steps.forEach((step, stepIndex) => { %>
+      <div class="card mt-4 p-3">
+        <h4><%= step.title %></h4>
+
+        <% step.fields.forEach(field => { %>
+          <div class="mb-3">
+            <label class="form-label">
+              <%= field.label %>
+              <% if (field.required) { %><span class="text-danger">*</span><% } %>
+            </label>
+
+            <% if (field.type === 'textarea') { %>
+              <textarea
+                class="form-control"
+                name="<%= field.name %>"
+                <%= field.required ? "required" : "" %>
+              ></textarea>
+
+            <% } else if (field.type === 'file') { %>
+              <input
+                type="file"
+                class="form-control"
+                name="<%= field.name %>"
+                <%= field.required ? "required" : "" %>
+              >
+
+            <% } else { %>
+              <input
+                type="<%= field.type %>"
+                class="form-control"
+                name="<%= field.name %>"
+                <%= field.required ? "required" : "" %>
+              >
+            <% } %>
+          </div>
+        <% }) %>
+      </div>
+    <% }) %>
+
+    <button class="btn btn-success mt-4">
+      إرسال الطلب
+    </button>
+
+  </form>
+</div>

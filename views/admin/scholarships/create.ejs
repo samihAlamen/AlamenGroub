@@ -1,0 +1,209 @@
+<div class="container mt-4">
+  <h2>إنشاء منحة جديدة</h2>
+
+  <% if (typeof error !== "undefined") { %>
+    <div class="alert alert-danger"><%= error %></div>
+  <% } %>
+
+  <form method="POST" action="/admin/scholarships/create" onsubmit="prepareSteps()">
+
+    <!-- بيانات المنحة -->
+    <div class="mb-3">
+      <label>عنوان المنحة</label>
+      <input type="text" name="title" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label>الوصف</label>
+      <textarea name="description" class="form-control"></textarea>
+    </div>
+
+    <div class="mb-3">
+      <label>آخر موعد</label>
+      <input type="date" name="deadline" class="form-control">
+    </div>
+
+    <hr>
+
+    <!-- إعداد الصفحات -->
+    <h4>إعداد الصفحات</h4>
+
+    <div class="mb-3">
+      <label>عدد الخطوات في كل صفحة</label>
+      <input type="number"
+             min="1"
+             value="1"
+             class="form-control"
+             onchange="setStepsPerPage(this.value)">
+    </div>
+
+    <hr>
+
+    <!-- الخطوات -->
+    <h4>الخطوات</h4>
+    <div id="stepsContainer"></div>
+
+    <button type="button"
+            class="btn btn-sm btn-outline-primary mt-2"
+            onclick="addStep()">
+      + إضافة خطوة
+    </button>
+
+    <input type="hidden" name="steps" id="stepsInput">
+
+    <div class="mt-4">
+      <button class="btn btn-success">حفظ المنحة</button>
+    </div>
+
+  </form>
+</div>
+
+<script>
+/* =====================
+   STATE
+===================== */
+let steps = [];
+let stepsPerPage = 1;
+
+/* =====================
+   CONFIG
+===================== */
+function setStepsPerPage(value) {
+  stepsPerPage = Math.max(1, parseInt(value) || 1);
+  render();
+}
+
+/* =====================
+   SAVE CURRENT VALUES
+===================== */
+function saveCurrentValues() {
+  const container = document.getElementById("stepsContainer");
+  const pageCards = container.querySelectorAll('.card.border-primary');
+
+  pageCards.forEach((pageCard, pageIndex) => {
+    const stepCards = pageCard.querySelectorAll('.card:not(.border-primary)');
+    stepCards.forEach((stepCard, sOffset) => {
+      const sIndex = pageIndex * stepsPerPage + sOffset;
+      if (!steps[sIndex]) return;
+
+      // حفظ عنوان الخطوة
+      const titleInput = stepCard.querySelector('input[placeholder="اسم الخطوة"]');
+      if (titleInput) steps[sIndex].title = titleInput.value;
+
+      // حفظ الحقول
+      const fieldDivs = stepCard.querySelectorAll('.border.p-2');
+      fieldDivs.forEach((fieldDiv, fIndex) => {
+        if (!steps[sIndex].fields[fIndex]) return;
+        const inputs = fieldDiv.querySelectorAll('input, select');
+        steps[sIndex].fields[fIndex].label = inputs[0]?.value || '';
+        steps[sIndex].fields[fIndex].name = inputs[1]?.value || '';
+        steps[sIndex].fields[fIndex].type = inputs[2]?.value || 'text';
+        steps[sIndex].fields[fIndex].required = inputs[3]?.checked || false;
+      });
+    });
+  });
+}
+
+/* =====================
+   STEP MANAGEMENT
+===================== */
+function addStep() {
+  saveCurrentValues();
+  steps.push({ title: "", fields: [] });
+  render();
+}
+
+function addField(stepIndex) {
+  saveCurrentValues();
+  if (!steps[stepIndex]) return;
+  steps[stepIndex].fields.push({ label: "", name: "", type: "text", required: false });
+  render();
+}
+
+/* =====================
+   RENDER
+===================== */
+function render() {
+  const container = document.getElementById("stepsContainer");
+  container.innerHTML = "";
+
+  if (steps.length === 0) {
+    container.innerHTML = `<p class="text-muted">لا توجد خطوات بعد</p>`;
+    return;
+  }
+
+  const pages = [];
+  for (let i = 0; i < steps.length; i += stepsPerPage) {
+    pages.push(steps.slice(i, i + stepsPerPage));
+  }
+
+  pages.forEach((pageSteps, pageIndex) => {
+    const pageHtml = document.createElement('div');
+    pageHtml.className = 'card mt-4 p-3 border-primary';
+    pageHtml.innerHTML = `<h5>صفحة ${pageIndex + 1}</h5>`;
+    
+    pageSteps.forEach((step, sOffset) => {
+      const sIndex = pageIndex * stepsPerPage + sOffset;
+      const stepCard = document.createElement('div');
+      stepCard.className = 'card mt-3 p-3';
+      stepCard.innerHTML = `
+        <input class="form-control mb-2"
+               placeholder="اسم الخطوة"
+               value="${step.title ?? ""}"
+               oninput="steps[${sIndex}] && (steps[${sIndex}].title=this.value)">
+
+        ${step.fields.map((f, fIndex) => `
+          <div class="border p-2 mb-2">
+            <input class="form-control mb-1"
+                   placeholder="Label"
+                   value="${f.label ?? ""}"
+                   oninput="steps[${sIndex}]?.fields[${fIndex}] && (steps[${sIndex}].fields[${fIndex}].label=this.value)">
+            <input class="form-control mb-1"
+                   placeholder="name (unique)"
+                   value="${f.name ?? ""}"
+                   oninput="steps[${sIndex}]?.fields[${fIndex}] && (steps[${sIndex}].fields[${fIndex}].name=this.value)">
+            <select class="form-control mb-1"
+                    onchange="steps[${sIndex}]?.fields[${fIndex}] && (steps[${sIndex}].fields[${fIndex}].type=this.value)">
+              <option value="text" ${f.type==="text"?"selected":""}>Text</option>
+              <option value="textarea" ${f.type==="textarea"?"selected":""}>Textarea</option>
+              <option value="number" ${f.type==="number"?"selected":""}>Number</option>
+              <option value="file" ${f.type==="file"?"selected":""}>File</option>
+              <option value="date" ${f.type==="date"?"selected":""}>Date</option>
+            </select>
+            <label>
+              <input type="checkbox" ${f.required ? "checked" : ""}
+                     onchange="steps[${sIndex}]?.fields[${fIndex}] && (steps[${sIndex}].fields[${fIndex}].required=this.checked)">
+              Required
+            </label>
+          </div>
+        `).join('')}
+        <button type="button"
+                class="btn btn-sm btn-outline-secondary"
+                onclick="addField(${sIndex})">
+          + إضافة حقل
+        </button>
+      `;
+      pageHtml.appendChild(stepCard);
+    });
+
+    container.appendChild(pageHtml);
+  });
+}
+
+/* =====================
+   SUBMIT
+===================== */
+function prepareSteps() {
+  saveCurrentValues(); // تأكد من حفظ آخر القيم قبل الإرسال
+  document.getElementById("stepsInput").value = JSON.stringify({
+    stepsPerPage,
+    steps
+  });
+}
+
+/* =====================
+   INITIALIZE
+===================== */
+addStep(); // خطوة افتراضية عند التحميل
+render();
+</script>

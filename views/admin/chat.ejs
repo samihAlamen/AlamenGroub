@@ -1,0 +1,27 @@
+<h1>رسائل الطلاب</h1>
+
+<% if (messages.length === 0) { %>
+  <p>لا توجد رسائل حالياً</p>
+<% } %>
+
+<% messages.forEach(msg => { %>
+  <div class="card mb-2">
+    <div class="card-body">
+      <strong>
+        <%= msg.sender.name %>
+<% if (msg.sender.role !== 'admin') { %>(طالب)<% } %>
+      </strong>
+
+      <p><%= msg.content %></p>
+      <small><%= new Date(msg.createdAt).toLocaleString() %></small>
+
+      <% if (msg.sender.role === 'user') { %>
+        <form action="/admin/chat/reply" method="POST" class="mt-2">
+          <input type="hidden" name="receiverId" value="<%= msg.sender._id %>">
+          <textarea name="content" class="form-control" required></textarea>
+          <button class="btn btn-sm btn-primary mt-1">رد</button>
+        </form>
+      <% } %>
+    </div>
+  </div>
+<% }) %>
