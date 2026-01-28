@@ -2,12 +2,11 @@ const express = require('express');
 const router = express.Router();
 const Conversation = require('../models/Conversation');
 const Message = require('../models/Message');
-const auth = require('../middlewares/auth');
+const { ensureAuth } = require('../middlewares/auth');
 
 // صفحة الدردشة للطالب
-router.get('/', auth, async (req, res) => {
+router.get('/', ensureAuth, async (req, res) => {
     try {
-        // جلب المحادثة الخاصة بالطالب
         let conversation = await Conversation.findOne({ participants: req.user._id });
         if (!conversation) {
             conversation = await Conversation.create({ participants: [req.user._id] });
@@ -22,4 +21,7 @@ router.get('/', auth, async (req, res) => {
     }
 });
 
+// صفحة الدردشة للطالب
+
 module.exports = router;
+
