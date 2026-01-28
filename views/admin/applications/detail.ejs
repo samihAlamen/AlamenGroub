@@ -1,74 +1,79 @@
-<div class="container mt-4">
-  <h2>تفاصيل الطلب</h2>
+<div class="container mt-4" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333;">
+
+  <h2 style="color: #2c3e50; margin-bottom: 1rem; border-bottom: 2px solid #3498db; padding-bottom: 0.5rem;">تفاصيل الطلب</h2>
 
   <!-- الطالب -->
-  <h5>الطالب</h5>
-  <p>
-    <strong><%= application.user?.name || "غير متوفر" %></strong>
-    – <%= application.user?.email || "غير متوفر" %>
-  </p>
+  <div style="margin-bottom: 1.5rem; padding: 1rem; background-color: #f9f9f9; border-left: 4px solid #3498db; border-radius: 4px;">
+    <h5 style="margin-bottom: 0.5rem; color: #2980b9;">الطالب</h5>
+    <p style="margin: 0;">
+      <strong><%= application.user?.name || "غير متوفر" %></strong>
+      – <%= application.user?.email || "غير متوفر" %>
+    </p>
+  </div>
 
   <!-- المنحة -->
-  <h5>المنحة</h5>
-  <p><%= application.scholarship?.title || "غير متوفر" %></p>
-  <p><%= application.scholarship?.description || "غير متوفر" %></p>
+  <div style="margin-bottom: 1.5rem; padding: 1rem; background-color: #fefefe; border-left: 4px solid #27ae60; border-radius: 4px;">
+    <h5 style="margin-bottom: 0.5rem; color: #27ae60;">المنحة</h5>
+    <p style="margin: 0.25rem 0;"><strong>العنوان:</strong> <%= application.scholarship?.title || "غير متوفر" %></p>
+    <p style="margin: 0.25rem 0;"><strong>الوصف:</strong> <%= application.scholarship?.description || "غير متوفر" %></p>
 
-  <% if (application.scholarship?.requirements?.length) { %>
-    <p><strong>المتطلبات:</strong></p>
-    <ul>
-      <% application.scholarship.requirements.forEach(req => { %>
-        <li><%= req %></li>
-      <% }) %>
-    </ul>
-  <% } %>
+    <% if (application.scholarship?.requirements?.length) { %>
+      <p style="margin-top: 0.5rem;"><strong>المتطلبات:</strong></p>
+      <ul style="margin: 0 0 0 1.5rem; padding: 0;">
+        <% application.scholarship.requirements.forEach(req => { %>
+          <li style="margin-bottom: 0.25rem;"><%= req %></li>
+        <% }) %>
+      </ul>
+    <% } %>
 
-  <% if (application.scholarship?.documents?.length) { %>
-    <p><strong>المستندات المطلوبة:</strong></p>
-    <ul>
-      <% application.scholarship.documents.forEach(doc => { %>
-        <li><%= doc %></li>
-      <% }) %>
-    </ul>
-  <% } %>
+    <% if (application.scholarship?.documents?.length) { %>
+      <p style="margin-top: 0.5rem;"><strong>المستندات المطلوبة:</strong></p>
+      <ul style="margin: 0 0 0 1.5rem; padding: 0;">
+        <% application.scholarship.documents.forEach(doc => { %>
+          <li style="margin-bottom: 0.25rem;"><%= doc %></li>
+        <% }) %>
+      </ul>
+    <% } %>
 
-  <% if (application.scholarship?.deadline) { %>
-    <p><strong>الموعد النهائي:</strong> <%= application.scholarship.deadline.toDateString() %></p>
-  <% } %>
+    <% if (application.scholarship?.deadline) { %>
+      <p style="margin-top: 0.5rem;"><strong>الموعد النهائي:</strong> <%= application.scholarship.deadline.toDateString() %></p>
+    <% } %>
+  </div>
 
-  <hr>
+  <hr style="border-top: 1px solid #bdc3c7;">
 
   <!-- إجابات الطالب العامة -->
   <% if (application.answers && Object.keys(application.answers).length) { %>
-    <h4>إجابات الطالب</h4>
+    <h4 style="color: #34495e; margin-bottom: 1rem;">إجابات الطالب</h4>
     <% for (let key in application.answers) { %>
       <% if (application.answers[key]) { %>
-        <div class="mb-2">
-          <strong><%= key %>:</strong>
+        <div style="margin-bottom: 1rem; padding: 0.75rem; background-color: #f7f7f7; border-radius: 4px;">
+          <strong style="display: block; margin-bottom: 0.25rem;"><%= key %>:</strong>
           <span><%= application.answers[key] %></span>
         </div>
       <% } %>
     <% } %>
   <% } %>
 
-  <hr>
+  <hr style="border-top: 1px solid #bdc3c7;">
 
   <!-- ملفات الطالب -->
   <% if (application.files && Object.keys(application.files).length) { %>
-    <h4>الملفات المرفقة</h4>
-    <ul>
+    <h4 style="color: #34495e; margin-bottom: 0.5rem;">الملفات المرفقة</h4>
+    <ul style="padding-left: 1.5rem;">
       <% for (let key in application.files) { %>
         <% let file = application.files[key]; %>
         <% if (file && file.path) { %>
-          <li>
+          <li style="margin-bottom: 0.5rem;">
             <strong><%= key %>:</strong>
-            <a href="/<%= file.path.replace(/^public\//, '') %>" target="_blank">
+            <a href="/<%= file.path.replace(/^public\//, '') %>" target="_blank" style="color: #2980b9; text-decoration: underline;">
               <%= file.originalName %>
             </a>
           </li>
         <% } %>
       <% } %>
     </ul>
-    <hr>
+    <hr style="border-top: 1px solid #bdc3c7;">
   <% } %>
 
   <!-- خطوات المنحة -->
@@ -82,29 +87,33 @@
     <% }) %>
 
     <% if (hasAnswers) { %>
-      <h4>الخطوات</h4>
+      <h4 style="color: #34495e; margin-bottom: 1rem;">الخطوات</h4>
       <% steps.forEach((step, index) => { %>
         <% let stepAnswer = application.answers[`step_${index + 1}`]; %>
         <% if (stepAnswer) { %>
-          <h5><%= step.title || "عنوان الخطوة غير متوفر" %></h5>
-          <p><%= step.description || "وصف الخطوة غير متوفر" %></p>
-
-          <h6>إجابة الطالب:</h6>
-          <p><%= stepAnswer %></p>
-          <hr>
+          <div style="margin-bottom: 1.5rem; padding: 1rem; background-color: #f1f8ff; border-left: 4px solid #3498db; border-radius: 4px;">
+            <h5 style="margin-bottom: 0.5rem; color: #2980b9;"><%= step.title || "عنوان الخطوة غير متوفر" %></h5>
+            <p style="margin-bottom: 0.5rem;"><%= step.description || "وصف الخطوة غير متوفر" %></p>
+            <h6 style="margin-bottom: 0.25rem;">إجابة الطالب:</h6>
+            <p style="margin: 0;"><%= stepAnswer %></p>
+          </div>
         <% } %>
       <% }) %>
+      <hr style="border-top: 1px solid #bdc3c7;">
     <% } %>
   <% } %>
 
   <!-- أزرار الإدارة -->
   <% if (application.status === "pending") { %>
-    <form method="POST" action="/admin/applications/<%= application._id %>/approve" style="display:inline">
-      <button class="btn btn-success">قبول</button>
-    </form>
+    <div style="margin-top: 1rem;">
+      <form method="POST" action="/admin/applications/<%= application._id %>/approve" style="display:inline; margin-right: 0.5rem;">
+        <button class="btn btn-success" style="padding: 0.5rem 1rem; border-radius: 4px; background-color: #27ae60; border: none; color: white; cursor: pointer;">قبول</button>
+      </form>
 
-    <form method="POST" action="/admin/applications/<%= application._id %>/reject" style="display:inline">
-      <button class="btn btn-danger">رفض</button>
-    </form>
+      <form method="POST" action="/admin/applications/<%= application._id %>/reject" style="display:inline;">
+        <button class="btn btn-danger" style="padding: 0.5rem 1rem; border-radius: 4px; background-color: #c0392b; border: none; color: white; cursor: pointer;">رفض</button>
+      </form>
+    </div>
   <% } %>
+
 </div>
