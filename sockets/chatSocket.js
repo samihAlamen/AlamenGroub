@@ -1,25 +1,27 @@
-const Conversation = require('../models/Conversation');
 const Message = require('../models/Message');
+const Conversation = require('../models/Conversation');
 
-module.exports = (io) => {
-  io.on('connection', (socket) => {
-    console.log('🟢 User connected');
+const chatSocket = (io) => {
+    io.on('connection', (socket) => {
+        console.log('New user connected:', socket.id);
 
-    socket.on('joinConversation', (conversationId) => {
-      socket.join(conversationId);
+        // الانضمام لغرفة المحادثة
+        socket.on('joinConversation', (conversationId) => {
+            socket.join(conversationId);
+        });
+
+        // إرسال رسالة
+        socket.on('sendMessage', async ({ conversationId, senderId, text }) => {
+            try {
+                const message = await Message.create({ conversation: conversationId, sender: senderId, text });
+                const populatedMessage = await message.populate('sender');
+
+                io.to(conversationId).emit('newMessage', populatedMessage);
+            } catch (err) {
+                console.error(err);
+            }
+        });
     });
-
-    socket.on('sendMessage', async ({ conversationId, senderId, content }) => {
-      const message = await Message.create({ conversation: conversationId, sender: senderId, content });
-      await Conversation.findByIdAndUpdate(conversationId, { lastMessage: content });
-
-      io.to(conversationId).emit('newMessage', {
-        content,
-        sender: senderId,
-        createdAt: message.createdAt
-      });
-    });
-
-    socket.on('disconnect', () => console.log('🔴 User disconnected'));
-  });
 };
+
+module.exports = chatSocket;
