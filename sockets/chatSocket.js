@@ -1,36 +1,60 @@
+const socketio = require('socket.io');
 const Message = require('../models/Message');
 const Conversation = require('../models/Conversation');
-const mongoose = require('mongoose');  // إضافة mongoose للتحقق من الـ ObjectId
 
-const chatSocket = (io) => {
+module.exports = function (server) {
+    const io = socketio(server);
+    let users = {};  // لتخزين المستخدمين المتصلين
+
     io.on('connection', (socket) => {
-        console.log('New user connected:', socket.id);
-
-        // الانضمام لغرفة المحادثة
-        socket.on('joinConversation', (conversationId) => {
-            socket.join(conversationId);
+        // عند الاتصال، تخزين الـ socketId للمستخدم
+        socket.on('userConnected', (userId) => {
+            users[userId] = socket.id;
         });
 
-        // إرسال رسالة
-        socket.on('sendMessage', async ({ conversationId, senderId, text }) => {
-            try {
-                // التحقق من صحة senderId (يجب أن يكون ObjectId صالح)
-                if (!mongoose.Types.ObjectId.isValid(senderId)) {
-                    console.error('Invalid senderId:', senderId);
-                    return;
+        // إرسال رسالة جديدة
+        socket.on('sendMessage', async (data) => {
+            const { senderId, receiverId, messageText } = data;
+
+            // تخزين الرسالة في قاعدة البيانات
+            const message = new Message({
+                text: messageText,
+                sender: senderId,
+                receiver: receiverId,
+            });
+
+            await message.save();
+
+            // التحقق من وجود محادثة
+            let conversation = await Conversation.findOne({
+                participants: { $all: [senderId, receiverId] },
+            });
+
+            if (!conversation) {
+                conversation = new Conversation({
+                    participants: [senderId, receiverId],
+                    messages: [message._id],
+                });
+            } else {
+                conversation.messages.push(message._id);
+            }
+
+            await conversation.save();
+
+            // إرسال الرسالة إلى المستقبل عبر WebSocket
+            const receiverSocketId = users[receiverId];
+            if (receiverSocketId) {
+                io.to(receiverSocketId).emit('newMessage', message);
+            }
+        });
+
+        // عند قطع الاتصال
+        socket.on('disconnect', () => {
+            for (let userId in users) {
+                if (users[userId] === socket.id) {
+                    delete users[userId];
                 }
-
-                // إرسال الرسالة بعد التحقق
-                const message = await Message.create({ conversation: conversationId, sender: senderId, text });
-                const populatedMessage = await message.populate('sender');
-
-                // إرسال الرسالة للجميع في نفس المحادثة
-                io.to(conversationId).emit('newMessage', populatedMessage);
-            } catch (err) {
-                console.error('Error saving message:', err);
             }
         });
     });
 };
-
-module.exports = chatSocket;
