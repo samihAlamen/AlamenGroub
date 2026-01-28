@@ -7,4 +7,12 @@ const MessageSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
+// التحقق من أن الـ sender هو ObjectId صالح عند حفظ الرسالة
+MessageSchema.pre('save', function(next) {
+    if (!mongoose.Types.ObjectId.isValid(this.sender)) {
+        return next(new Error('Invalid sender ObjectId'));
+    }
+    next();
+});
+
 module.exports = mongoose.model('Message', MessageSchema);
