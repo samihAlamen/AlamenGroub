@@ -28,6 +28,17 @@
 
   <hr>
 
+  <!-- عرض إجابات الطالب -->
+  <h4>إجابات الطالب</h4>
+  <% for (let key in application.answers) { %>
+    <div class="mb-2">
+      <strong><%= key %>:</strong>
+      <span><%= application.answers[key] || "لا يوجد إجابة" %></span>
+    </div>
+  <% } %>
+
+  <hr>
+
   <% if (Array.isArray(application.scholarship?.steps?.steps)) { %>
     <h4>الخطوات</h4>
     <% application.scholarship.steps.steps.forEach((step, index) => { %>
@@ -35,8 +46,8 @@
       <p><%= step.description || "وصف الخطوة غير متوفر" %></p>
 
       <h6>إجابة الطالب:</h6>
-      <% let stepAnswer = application.stepsAnswers.find(sa => sa.step === `step_${index + 1}`); %>
-      <p><%= stepAnswer ? stepAnswer.answer : "لا يوجد إجابة" %></p>
+      <% let stepAnswer = application.answers[`step_${index + 1}`]; %>
+      <p><%= stepAnswer ? stepAnswer : "لا يوجد إجابة" %></p>
 
       <hr>
     <% }) %>
