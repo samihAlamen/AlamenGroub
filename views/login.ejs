@@ -20,5 +20,64 @@
         <p class="mt-3 text-center">
             ليس لديك حساب؟ <a href="/auth/register">إنشاء حساب جديد</a>
         </p>
+<!-- ✅ زر تسجيل الدخول عبر منصتك -->
+<div id="myplatform-oauth"></div>
+
+<script>
+(function() {
+  // ==========================
+  // تكوين الزر
+  // ==========================
+  const CLIENT_ID = 'YOUR_CLIENT_ID'; // استبدل بمعرف التطبيق الخاص بك
+  const REDIRECT_URI = 'https://example.com/callback'; // رابط إعادة التوجيه
+  const BUTTON_TEXT = 'Sign in with MyPlatform';
+  const BUTTON_COLOR = '#4f46e5';
+  const BUTTON_HOVER_COLOR = '#3730a3';
+  const LOGO_URL = 'https://yourdomain.com/assets/logo.png'; // شعار منصتك
+
+  // ==========================
+  // توليد قيمة state عشوائية
+  // ==========================
+  function generateState(length = 16) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  }
+
+  const state = generateState(20);
+
+  // ==========================
+  // إنشاء الرابط
+  // ==========================
+  const oauthUrl = `https://yourdomain.com/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&state=${state}`;
+
+  // ==========================
+  // إنشاء الزر
+  // ==========================
+  const container = document.getElementById('myplatform-oauth');
+  const btn = document.createElement('a');
+  btn.href = oauthUrl;
+  btn.innerHTML = `<img src="${LOGO_URL}" alt="Logo" style="height:24px;width:24px;margin-right:10px;vertical-align:middle"/>${BUTTON_TEXT}`;
+  btn.style.display = 'inline-flex';
+  btn.style.alignItems = 'center';
+  btn.style.padding = '10px 20px';
+  btn.style.backgroundColor = BUTTON_COLOR;
+  btn.style.color = 'white';
+  btn.style.textDecoration = 'none';
+  btn.style.fontWeight = '600';
+  btn.style.borderRadius = '6px';
+  btn.style.transition = 'background 0.3s';
+  
+  btn.addEventListener('mouseover', () => btn.style.backgroundColor = BUTTON_HOVER_COLOR);
+  btn.addEventListener('mouseout', () => btn.style.backgroundColor = BUTTON_COLOR);
+
+  container.appendChild(btn);
+})();
+</script>
+
     </div>
 </div>
+
