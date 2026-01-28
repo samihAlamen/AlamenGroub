@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Conversations</title>
+  
+  <style>
+    .post-card {
+      background-color: var(--post-bg-color);
+      color: var(--post-text-color);
+    }
+
+    .chat-box {
+      background-color: var(--chat-bg-color);
+      color: var(--chat-text-color);
+    }
+
+    .notification {
+      background-color: var(--notification-color);
+    }
+
+    .saved-post {
+      background-color: var(--saved-posts-bg-color);
+    }
+
+
+    :root {
+  --chat-bg-color: #ffffff;
+  --chat-text-color: #333333;
+}
+
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+  <h2>Chats</h2>
+  <div class="conversations">
+
+
+    <% conversations.forEach(conv => {
+      let other = null;
+      if (conv.participants && Array.isArray(conv.participants)) {
+        other = conv.participants.find(p => p && p._id && p._id.toString() !== user._id.toString());
+      }
+    %>
+      <% if (other) { %>
+        <div
+          class="chat-item chat-box p-3 rounded mb-2 position-relative"
+          data-id="<%= other._id %>"
+          data-username="<%= other.username %>"
+          onmousedown="handleMouseDown(event, this)"
+          onmouseup="handleMouseUp(event)"
+          ontouchstart="handleMouseDown(event, this)"
+          ontouchend="handleMouseUp(event)"
+        >
+          <a href="/chat/<%= other._id %>" class="chat-link d-flex align-items-center">
+            <div class="avatar me-3">
+              <img src="<%= other.avatar || '/default-avatar.png' %>" alt="<%= other.username %>" class="avatar-img">
+            </div>
+            <div class="chat-details">
+              <strong><%= other.username %></strong>
+              <p class="last-message mb-0"><%= conv.lastMessage || "Start a conversation" %></p>
+            </div>
+          </a>
+
+          <!-- خيارات اللمس المطول -->
+         
+        </div>
+      <% } %>
+    <% }); %>
+  </div>
+
+  <canvas id="interactiveCanvas"></canvas>
+</div>
+
+
+  <style>
+
+
+.chat-options-menu {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  padding: 10px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  max-width: 400px;
+}
+
+.chat-options-menu button {
+  border: none;
+  background: none;
+  padding: 12px;
+  font-size: 16px;
+  border-top: 1px solid #ccc;
+}
+
+.chat-options-menu button:first-child {
+  border-top: none;
+}
+
+
+
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f7fa;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      height: 100vh;
+      padding-top: 50px;
+    }
+
+    .chat-container {
+      width: 80%;
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #4c6ef5;
+    }
+
+    .conversations {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 20px;
+    }
+
+    .chat-item {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+      transition: background-color 0.3s ease;
+    }
+
+    .chat-item:hover {
+      background-color: #e3e9ff;
+      cursor: pointer;
+    }
+
+    .chat-link {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      color: #333;
+      width: 100%;
+    }
+
+    .avatar {
+      width: 50px;
+      height: 50px;
+      margin-right: 15px;
+      border-radius: 50%;
+      overflow: hidden;
+    }
+
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .chat-details {
+      flex-grow: 1;
+    }
+
+    .chat-details strong {
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+
+    .last-message {
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.1;
+      pointer-events: none;
+    }
+
+    header, .hidden-navbar {
+      display: none;
+    }
+
+    #overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.3);
+  z-index: 9998;
+}
+
+  </style>
+
+  <script>
+    const theme = <%- JSON.stringify(currentUser?.themeSettings || {}) %>;
+
+    for (const [key, val] of Object.entries(theme)) {
+      document.documentElement.style.setProperty('--' + key.replace(/([A-Z])/g, "-$1").toLowerCase(), val);
+    }
+  </script>
+  
+  <script>
+  let holdTimer;
+  let selectedChatId = null;
+  let selectedUsername = null;
+
+  function handleMouseDown(e, el) {
+    holdTimer = setTimeout(() => {
+      selectedChatId = el.dataset.id;
+      selectedUsername = el.dataset.username;
+      document.getElementById('chat-options-menu').classList.remove('d-none');
+
+      document.getElementById('overlay').classList.remove('d-none');
+document.getElementById('chat-options-menu').classList.remove('d-none');
+    }, 600); // 600ms = long press
+  }
+
+  function handleMouseUp(e) {
+    clearTimeout(holdTimer);
+  }
+
+  function cancelOptions() {
+    document.getElementById('chat-options-menu').classList.add('d-none');
+    selectedChatId = null;
+    selectedUsername = null;
+  }
+
+  function openChat() {
+    if (selectedChatId) {
+      window.location.href = `/chat/${selectedChatId}`;
+    }
+  }
+
+  async function deleteConversation() {
+    if (!selectedChatId) return;
+    const confirmed = confirm(`Delete conversation with ${selectedUsername}?`);
+    if (!confirmed) return;
+
+    const res = await fetch(`/chat/delete/${selectedChatId}`, { method: 'DELETE' });
+    if (res.ok) {
+      location.reload();
+    } else {
+      alert('Error deleting conversation.');
+    }
+  }
+
+  async function archiveConversation() {
+  const res = await fetch(`/chat/archive/${selectedChatId}`, { method: 'POST' });
+  if (res.ok) {
+    alert('Conversation archived');
+    location.reload();
+  }
+}
+
+
+  async function blockUser() {
+    if (!selectedChatId) return;
+    const confirmed = confirm(`Block ${selectedUsername}?`);
+    if (!confirmed) return;
+
+    const res = await fetch(`/users/block/${selectedChatId}`, { method: 'POST' });
+    if (res.ok) {
+      alert(`${selectedUsername} has been blocked.`);
+      location.reload();
+    } else {
+      alert('Error blocking user.');
+    }
+  }
+
+
+  
+
+</script>
+<!-- عنصر ثابت واحد فقط في نهاية الصفحة -->
+<div id="chat-options-menu" class="chat-options-menu d-none">
+  <button onclick="openChat()">Open Chat</button>
+  <button onclick="deleteConversation()">Delete Conversation</button>
+  <button onclick="blockUser()">Block User</button>
+  <button onclick="cancelOptions()">Cancel</button>
+  <button onclick="archiveConversation()">Archive</button>
+
+</div>
+<div id="overlay" class="d-none" onclick="cancelOptions()"></div>
+
+</body>
+</html>
