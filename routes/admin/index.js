@@ -21,9 +21,12 @@ router.get(
   ensureAuth,
   ensureRole("admin"),
   (req, res) => {
+        const userAdmin = await User.findById(req.user._id);
+
     res.render("admin/dashboard", {
   title: "Admin Dashboard",
-  user: req.user
+  user: req.user,
+      userAdmin
 });
 
   }
@@ -45,3 +48,4 @@ router.use(
 );
 
 module.exports = router;
+
