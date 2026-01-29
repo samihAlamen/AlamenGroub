@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../../models/User");  // تعديل المسار حسب المكان الذي يوجد فيه الموديل
-
+const Chat = require("../../models/Chat"); // تأكد من أنك تستخدم الموديل الصحيح الخاص بالدردشات
 const { ensureAuth, ensureRole } = require("../../middlewares/auth");
 
 const scholarshipRoutes = require("./scholarships");
@@ -29,18 +29,25 @@ router.get(
         return res.status(401).send("User not authenticated or user ID missing");
       }
 
+      // جلب بيانات الأدمن بناءً على _id
       const userAdmin = await User.findById(req.user._id);
-      
+
       // تحقق من أن البيانات الخاصة بالأدمن موجودة
       if (!userAdmin) {
         return res.status(404).send("Admin not found");
       }
 
-      // عرض الصفحة مع بيانات الأدمن
+      // جلب الدردشات الخاصة بالأدمن
+      const chats = await Chat.find({ adminId: req.user._id })  // تأكد من أن adminId موجود في موديل الدردشة
+        .populate("userId", "name email") // استرجاع معلومات المستخدمين المرتبطين بالدردشة (اختياري)
+        .populate("messages.userId", "name");  // استرجاع معلومات المرسل في كل رسالة إذا كان لديك "messages" في الـ Chat
+
+      // عرض الصفحة مع بيانات الأدمن والدردشات
       res.render("admin/dashboard", {
         title: "Admin Dashboard",
         user: req.user,
         profileUser: userAdmin, // تمرير بيانات الأدمن إلى الصفحة
+        chats: chats,           // تمرير بيانات الدردشات الخاصة بالأدمن
       });
     } catch (err) {
       console.error(err);
@@ -48,7 +55,6 @@ router.get(
     }
   }
 );
-
 
 // Sub routes for scholarships and applications
 router.use(
@@ -66,5 +72,8 @@ router.use(
 );
 
 module.exports = router;
+
+
+
 
 
