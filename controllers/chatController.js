@@ -3,7 +3,7 @@ const Message = require('../models/Message');
 const User = require('../models/User');
 
 exports.list = async (req, res) => {
-  const convs = await Conversation.find({ participants: req.user._id })
+  const convs = await Conversation.find({ participants: req.user.id })
     .sort('-updatedAt')
     .populate('participants', 'username avatar')
     .lean();
@@ -12,9 +12,9 @@ exports.list = async (req, res) => {
 
 exports.create = async (req, res) => {
   const { otherId } = req.body;
-  let conv = await Conversation.findOne({ participants: { $all: [req.user._id, otherId] } });
-  if (!conv) conv = await Conversation.create({ participants: [req.user._id, otherId] });
-  res.json({ convId: conv._id });
+  let conv = await Conversation.findOne({ participants: { $all: [req.user.id, otherId] } });
+  if (!conv) conv = await Conversation.create({ participants: [req.user.id, otherId] });
+  res.json({ convId: conv.id });
 };
 
 exports.show = async (req, res) => {
@@ -25,13 +25,13 @@ exports.show = async (req, res) => {
     if (!other) return res.status(404).send('User not found');
 
     let conv = await Conversation.findOne({
-      participants: { $all: [req.user._id, otherUserId] }
+      participants: { $all: [req.user.id, otherUserId] }
     }).populate('participants', 'username avatar');
 
     if (!conv) {
       // إذا كانت المحادثة غير موجودة، نقوم بإنشائها
-      conv = await Conversation.create({ participants: [req.user._id, otherUserId] });
-      conv = await Conversation.findById(conv._id).populate('participants', 'username avatar');
+      conv = await Conversation.create({ participants: [req.user.id, otherUserId] });
+      conv = await Conversation.findById(conv.id).populate('participants', 'username avatar');
     }
 
     if (!conv || !Array.isArray(conv.participants)) {
@@ -39,10 +39,10 @@ exports.show = async (req, res) => {
     }
 
     // جلب الرسائل المتعلقة بالمحادثة
-    const msgs = await Message.find({ conversation: conv._id }).sort('createdAt').lean();
+    const msgs = await Message.find({ conversation: conv.id }).sort('createdAt').lean();
 
     // نحدد الشخص الآخر في المحادثة
-    const otherParticipant = conv.participants.find(p => !p._id.equals(req.user._id));
+    const otherParticipant = conv.participants.find(p => !p.id.equals(req.user.id));
     if (!otherParticipant) {
       return res.status(400).send('The other party cannot be found in the conversation.');
     }
@@ -60,3 +60,4 @@ exports.show = async (req, res) => {
     res.status(500).send('A server error occurred.');
   }
 };
+
