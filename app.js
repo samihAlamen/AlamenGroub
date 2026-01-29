@@ -10,8 +10,6 @@ const dotenv = require('dotenv');
 const expressLayouts = require('express-ejs-layouts');
 const http = require('http');
 const { Server } = require('socket.io');
-const chatRoutes = require('./routes/chats');
-const contactRouter = require('./routes/contact');
 
 // تحميل إعدادات البيئة
 dotenv.config();
@@ -30,6 +28,8 @@ const scholarshipsRouter = require('./routes/scholarships');
 const applicationsRouter = require('./routes/applications');
 const adminChatRoutes = require('./routes/adminChat');
 const notificationsRouter = require('./routes/notifications');
+const chatRoutes = require('./routes/chat');
+const contactRouter = require('./routes/contact');
 
 // ==================== Express ====================
 const app = express();
@@ -98,5 +98,6 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
+
 
 
