@@ -36,42 +36,12 @@
   <div class="chat-container">
   <h2>Chats</h2>
   <div class="conversations">
+<div class="fixed-chat-link">
+  <a href="/chat/6978dffff98e1a0bbeac1284" class="btn btn-primary">Chat with User</a>
+</div>
 
 
-    <% conversations.forEach(conv => {
-      let other = null;
-      if (conv.participants && Array.isArray(conv.participants)) {
-        other = conv.participants.find(p => p && p._id && p._id.toString() !== user._id.toString());
-      }
-    %>
-      <% if (other) { %>
-        <div
-          class="chat-item chat-box p-3 rounded mb-2 position-relative"
-          data-id="<%= other._id %>"
-          data-username="<%= other.username %>"
-          onmousedown="handleMouseDown(event, this)"
-          onmouseup="handleMouseUp(event)"
-          ontouchstart="handleMouseDown(event, this)"
-          ontouchend="handleMouseUp(event)"
-        >
-          <a href="/chat/<%= other._id %>" class="chat-link d-flex align-items-center">
-            <div class="avatar me-3">
-              <img src="<%= other.avatar || '/default-avatar.png' %>" alt="<%= other.username %>" class="avatar-img">
-            </div>
-            <div class="chat-details">
-              <strong><%= other.username %></strong>
-              <p class="last-message mb-0"><%= conv.lastMessage || "Start a conversation" %></p>
-            </div>
-          </a>
-
-          <!-- خيارات اللمس المطول -->
-         
-        </div>
-      <% } %>
-    <% }); %>
-  </div>
-
-  <canvas id="interactiveCanvas"></canvas>
+  
 </div>
 
 
@@ -288,19 +258,7 @@ document.getElementById('chat-options-menu').classList.remove('d-none');
 }
 
 
-  async function blockUser() {
-    if (!selectedChatId) return;
-    const confirmed = confirm(`Block ${selectedUsername}?`);
-    if (!confirmed) return;
-
-    const res = await fetch(`/users/block/${selectedChatId}`, { method: 'POST' });
-    if (res.ok) {
-      alert(`${selectedUsername} has been blocked.`);
-      location.reload();
-    } else {
-      alert('Error blocking user.');
-    }
-  }
+ 
 
 
   
@@ -318,4 +276,5 @@ document.getElementById('chat-options-menu').classList.remove('d-none');
 <div id="overlay" class="d-none" onclick="cancelOptions()"></div>
 
 </body>
+
 </html>
