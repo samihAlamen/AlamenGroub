@@ -209,65 +209,48 @@ flex: 1;
 <body>
 <% layout = false %>
 
-  <div class="chat-container" class="chat-box">
+  <div class="chat-container">
     <h2>Chat with <%= otherUser.username %></h2>
 
-    <div id="msgs" >
+    <div id="msgs">
       <% messages.forEach(m => { 
-  const isSent = String(m.sender) === String(user._id);
-%>
-  <div class="<%= isSent ? 'sent' : 'recv' %>" class="chat-box" style="background-color: var(--chat-bg-color); color: var(--chat-text-color);">
+        const isSent = String(m.sender) === String(user._id);
+      %>
+        <div class="<%= isSent ? 'sent' : 'recv' %>" class="chat-box" style="background-color: var(--chat-bg-color); color: var(--chat-text-color);">
+          
+          <% if (m.message) { %>
+            <p><%= m.message %></p>
+          <% } %>
 
-    <% if (m.attachmentPath && m.attachmentType === 'image') { %>
-      <img src="<%= m.attachmentPath %>" alt="Image" style="max-width: 200px; border-radius: 8px;" />
-    <% } else if (m.attachmentPath && m.attachmentType === 'video') { %>
-      <video controls style="max-width: 250px; border-radius: 8px;">
-        <source src="<%= m.attachmentPath %>" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-    <% } %>
+          <small><%= new Date(m.createdAt).toLocaleTimeString() %></small>
 
-    <% if (m.message) { %>
-      <p><%= m.message %></p>
-    <% } %>
-
-    <small><%= new Date(m.createdAt).toLocaleTimeString() %></small>
-
-    <div class="sentiment">
-      <% if (m.emotion === 'حب') { %>
-        <span style="color:pink;">💖 Love</span>
-      <% } else if (m.emotion === 'إيجابي') { %>
-        <span style="color:green;">😊 Positive</span>
-      <% } else if (m.emotion === 'ممتن') { %>
-        <span style="color:blue;">🙏 Grateful</span>
-      <% } else if (m.emotion === 'غضب') { %>
-        <span style="color:red;">😡 Angry</span>
-      <% } else if (m.emotion === 'سلبي') { %>
-        <span style="color:red;">😞 Negative</span>
-      <% } else { %>
-        <span style="color:gray;">😊 Be happy</span>
-      <% } %>
-    </div>
-  </div>
-<% }) %>
-
+          <div class="sentiment">
+            <% if (m.emotion === 'حب') { %>
+              <span style="color:pink;">💖 Love</span>
+            <% } else if (m.emotion === 'إيجابي') { %>
+              <span style="color:green;">😊 Positive</span>
+            <% } else if (m.emotion === 'ممتن') { %>
+              <span style="color:blue;">🙏 Grateful</span>
+            <% } else if (m.emotion === 'غضب') { %>
+              <span style="color:red;">😡 Angry</span>
+            <% } else if (m.emotion === 'سلبي') { %>
+              <span style="color:red;">😞 Negative</span>
+            <% } else { %>
+              <span style="color:gray;">😊 Be happy</span>
+            <% } %>
+          </div>
+        </div>
+      <% }) %>
     </div>
 
-    <form action="/chat/upload/<%= otherUser._id %>" method="POST" enctype="multipart/form-data" class="upload-form">
-  <div class="preview-container" id="previewContainer"></div>
-<!-- زر مخصص -->
-<label for="fileInput" class="custom-file-upload">Choose File</label>
-<input type="file" id="fileInput" name="attachment" accept="image/*,video/*" style="display: none;" />
-<span id="fileName">No file chosen</span>
-
-  <input type="text" name="message" placeholder="Type a message..." />
-  <button type="submit">Send</button>
-</form>
-
-
-
+    <!-- فقط نموذج إرسال الرسائل بدون مرفقات -->
+    <form action="/chat/send/<%= otherUser._id %>" method="POST" class="message-form">
+      <input type="text" name="message" placeholder="Type a message..." required />
+      <button type="submit">Send</button>
+    </form>
   </div>
 
+  <!-- الكود الخاص بالـCanvas يمكن أن تبقيه أو تحذفيه حسب حاجتك -->
   <canvas id="interactiveCanvas"></canvas>
 
   <script src="/socket.io/socket.io.js"></script>
@@ -488,6 +471,7 @@ document.getElementById('fileInput').addEventListener('change', function () {
 
 </body>
 </html>
+
 
 
 
