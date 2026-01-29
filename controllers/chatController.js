@@ -29,6 +29,7 @@ exports.show = async (req, res) => {
     }).populate('participants', 'username avatar');
 
     if (!conv) {
+      // إذا كانت المحادثة غير موجودة، نقوم بإنشائها
       conv = await Conversation.create({ participants: [req.user._id, otherUserId] });
       conv = await Conversation.findById(conv._id).populate('participants', 'username avatar');
     }
@@ -37,22 +38,21 @@ exports.show = async (req, res) => {
       return res.status(404).send('The data is incorrect');
     }
 
+    // جلب الرسائل المتعلقة بالمحادثة
     const msgs = await Message.find({ conversation: conv._id }).sort('createdAt').lean();
 
+    // نحدد الشخص الآخر في المحادثة
     const otherParticipant = conv.participants.find(p => !p._id.equals(req.user._id));
     if (!otherParticipant) {
       return res.status(400).send('The other party cannot be found in the conversation.');
     }
-    const isBlocked = other.blockedUsers.includes(req.user._id) ||
-                  req.user.blockedUsers.includes(other._id);
 
+    // عرض المحادثة والرسائل
     res.render('chat', {
       conversation: conv,
       messages: msgs,
       user: req.user,
-      otherUser: otherParticipant ,
-        isBlocked  // <-- أرسله للواجهة
-
+      otherUser: otherParticipant,
     });
 
   } catch (err) {
