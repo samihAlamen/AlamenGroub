@@ -48,7 +48,7 @@ exports.show = async (req, res) => {
     }
 
     // نحدد الشخص الآخر في المحادثة
-    const otherParticipant = conv.participants.find(p => !p.id.equals(req.user.id));
+const otherParticipant = conv.participants.find(p => !p._id.equals(req.user.id));
     if (!otherParticipant) {
       return res.status(400).send('The other party cannot be found in the conversation.');
     }
@@ -67,5 +67,6 @@ exports.show = async (req, res) => {
     res.status(500).send('A server error occurred.');
   }
 };
+
 
 
