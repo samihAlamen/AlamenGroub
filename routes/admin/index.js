@@ -8,6 +8,7 @@ const scholarshipRoutes = require("./scholarships");
 const applicationRoutes = require("./applications");
 const chatRoutes = require('./chat');
 
+// استخدام الـ middleware الخاص بالدردشة
 router.use(
   '/chat',
   ensureAuth,
@@ -20,19 +21,23 @@ router.get(
   "/",
   ensureAuth,
   ensureRole("admin"),
-  (req, res) => {
-        const userAdmin = await User.findById(req.user._id);
-
-    res.render("admin/dashboard", {
-  title: "Admin Dashboard",
-  user: req.user,
-      profileUser: userAdmin
-});
-
+  async (req, res) => {
+    try {
+      // جلب معلومات الأدمن
+      const userAdmin = await User.findById(req.user._id); // التأكد من وجود الـ await
+      res.render("admin/dashboard", {
+        title: "Admin Dashboard",
+        user: req.user,
+        profileUser: userAdmin // تمرير معلومات الأدمن إلى الصفحة
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).send("Internal Server Error"); // التعامل مع الاستثناءات
+    }
   }
 );
 
-// Sub routes
+// Sub routes for scholarships and applications
 router.use(
   "/scholarships",
   ensureAuth,
@@ -48,5 +53,3 @@ router.use(
 );
 
 module.exports = router;
-
-
