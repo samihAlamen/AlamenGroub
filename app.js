@@ -29,7 +29,7 @@ const applicationsRouter = require('./routes/applications');
 const adminChatRoutes = require('./routes/adminChat');
 const notificationsRouter = require('./routes/notifications');
 const chatRoutes = require('./routes/chat');
-const contactRouter = require('./routes/contact');
+//const contactRouter = require('./routes/contact');
 
 // ==================== Express ====================
 const app = express();
@@ -87,7 +87,7 @@ app.use('/notifications', notificationsRouter);
 app.use('/profile', require('./routes/profile'));
 app.use('/admin', require('./routes/admin'));
 app.use('/', chatRoutes);
-app.use('/contact', contactRouter);
+//app.use('/contact', contactRouter);
 // ==================== صفحة 404 ====================
 app.use((req, res) => {
     res.status(404).render('404', { title: 'Page Not Found', layout: 'layouts/main' });
@@ -98,6 +98,7 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
+
 
 
 
