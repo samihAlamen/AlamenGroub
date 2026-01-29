@@ -4,19 +4,36 @@ const User = require('../models/User');
 
 exports.list = async (req, res) => {
   try {
-    // جلب المحادثات التي تحتوي على الأدمن في قائمة المشاركين
-    const convs = await Conversation.find({ participants: req.user.id })
-      .sort('-updatedAt')
-      .populate('participants', 'username avatar') // جلب بيانات المشاركين
-      .lean();
+    // التحقق من نوع المستخدم: هل هو طالب أو أدمن؟
+    if (req.user.role === 'student') {
+      // إذا كان طالبًا، نظهر له المحادثة مع الأدمن فقط
+      const convs = await Conversation.find({ participants: req.user.id })
+        .sort('-updatedAt')
+        .populate('participants', 'username avatar')
+        .lean();
 
-    // عرض صفحة المحادثات مع كل المحادثات
-    res.render('conversations', { conversations: convs, user: req.user });
+      // تصفية المحادثات لعرض محادثات الطالب مع الأدمن فقط
+      const adminConversations = convs.filter(conv => conv.participants.some(p => p.role === 'admin'));
+
+      res.render('conversations', { conversations: adminConversations, user: req.user });
+    } else if (req.user.role === 'admin') {
+      // إذا كان أدمن، نظهر له قائمة الطلاب الذين أرسلوا له رسائل
+      const convs = await Conversation.find({ participants: req.user.id })
+        .sort('-updatedAt')
+        .populate('participants', 'username avatar')
+        .lean();
+
+      // تصفية المحادثات لعرض المحادثات مع الطلاب فقط
+      const studentConversations = convs.filter(conv => conv.participants.some(p => p.role === 'student'));
+
+      res.render('conversations', { conversations: studentConversations, user: req.user });
+    }
   } catch (err) {
     console.error(err);
     res.status(500).send('A server error occurred.');
   }
 };
+
 
 
 exports.create = async (req, res) => {
@@ -29,11 +46,10 @@ exports.create = async (req, res) => {
 exports.show = async (req, res) => {
   try {
     const otherUserId = req.params.userId;
-
     const other = await User.findById(otherUserId);
     if (!other) return res.status(404).send('User not found');
 
-    // جلب المحادثة بين الأدمن والطالب المحدد
+    // جلب المحادثة بين الأدمن والطالب
     let conv = await Conversation.findOne({
       participants: { $all: [req.user.id, otherUserId] }
     }).populate('participants', 'username avatar');
@@ -47,25 +63,17 @@ exports.show = async (req, res) => {
     // جلب الرسائل المرتبطة بالمحادثة
     const msgs = await Message.find({ conversation: conv.id }).sort('createdAt').lean();
 
-    // جلب الطالب إذا كان موجودًا في المحادثة
-    let student;
-    if (conv.student) {
-      student = await User.findById(conv.student);  // جلب الطالب باستخدام الحقل 'student'
-    }
-
-    // تحديد الشخص الآخر في المحادثة (الذي ليس الأدمن)
+    // تحديد الشخص الآخر في المحادثة
     const otherParticipant = conv.participants.find(p => !p._id.equals(req.user.id));
     if (!otherParticipant) {
       return res.status(400).send('The other party cannot be found in the conversation.');
     }
 
-    // عرض المحادثة والرسائل
     res.render('chat', {
       conversation: conv,
       messages: msgs,
       user: req.user,
       otherUser: otherParticipant,
-      student: student,  // تمرير الطالب إلى العرض
     });
 
   } catch (err) {
@@ -73,6 +81,8 @@ exports.show = async (req, res) => {
     res.status(500).send('A server error occurred.');
   }
 };
+
+
 
 
 
