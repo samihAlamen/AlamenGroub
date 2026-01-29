@@ -6,6 +6,8 @@
         <img src="<%= conversation.participants.find(p => p._id.toString() !== user.id.toString()).avatar %>" alt="User Avatar" class="avatar" />
         <span><%= conversation.participants.find(p => p._id.toString() !== user.id.toString()).username %></span>
       </a>
+<a href="/chat/6978dffff98e1a0bbeac1284" class="btn btn-primary">Chat with User</a>
     </div>
   <% }) %>
 </div>
+
