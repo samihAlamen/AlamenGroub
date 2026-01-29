@@ -5,7 +5,7 @@ const User = require('../models/User');
 exports.list = async (req, res) => {
   try {
     // التحقق من نوع المستخدم: هل هو طالب أو أدمن؟
-    if (req.user.role === 'student') {
+    if (req.user.role === 'user') {
       // إذا كان طالبًا، نظهر له المحادثة مع الأدمن فقط
       const convs = await Conversation.find({ participants: req.user.id })
         .sort('-updatedAt')
@@ -24,7 +24,7 @@ exports.list = async (req, res) => {
         .lean();
 
       // تصفية المحادثات لعرض المحادثات مع الطلاب فقط
-      const studentConversations = convs.filter(conv => conv.participants.some(p => p.role === 'student'));
+      const studentConversations = convs.filter(conv => conv.participants.some(p => p.role === 'user'));
 
       res.render('conversations', { conversations: studentConversations, user: req.user });
     }
@@ -81,6 +81,7 @@ exports.show = async (req, res) => {
     res.status(500).send('A server error occurred.');
   }
 };
+
 
 
 
