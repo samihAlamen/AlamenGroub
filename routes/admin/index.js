@@ -25,12 +25,12 @@ router.get(
   async (req, res) => {
     try {
       // تحقق من أن `req.user` يحتوي على البيانات الصحيحة
-      if (!req.user || !req.user._id) {
+      if (!req.user || !req.user.id) {
         return res.status(401).send("User not authenticated or user ID missing");
       }
 
       // جلب بيانات الأدمن بناءً على _id
-      const userAdmin = await User.findById(req.user._id);
+      const userAdmin = await User.findById(req.user.id);
 
       // تحقق من أن البيانات الخاصة بالأدمن موجودة
       if (!userAdmin) {
@@ -38,7 +38,7 @@ router.get(
       }
 
       // جلب الدردشات الخاصة بالأدمن
-      const chats = await Chat.find({ adminId: req.user._id })  // تأكد من أن adminId موجود في موديل الدردشة
+      const chats = await Chat.find({ adminId: req.user.id })  // تأكد من أن adminId موجود في موديل الدردشة
         .populate("userId", "name email") // استرجاع معلومات المستخدمين المرتبطين بالدردشة (اختياري)
         .populate("messages.userId", "name");  // استرجاع معلومات المرسل في كل رسالة إذا كان لديك "messages" في الـ Chat
 
@@ -72,6 +72,7 @@ router.use(
 );
 
 module.exports = router;
+
 
 
 
