@@ -206,8 +206,7 @@ flex: 1;
 
   </style>
 </head>
-<body>
-<% layout = false %>
+<body><% layout = false %>
 
   <div class="chat-container">
     <h2>Chat with <%= otherUser.username %></h2>
@@ -216,7 +215,7 @@ flex: 1;
       <% messages.forEach(m => { 
         const isSent = String(m.sender) === String(user._id);
       %>
-        <div class="<%= isSent ? 'sent' : 'recv' %>" class="chat-box" style="background-color: var(--chat-bg-color); color: var(--chat-text-color);">
+        <div class="<%= isSent ? 'sent' : 'recv' %> chat-box" style="background-color: var(--chat-bg-color); color: var(--chat-text-color);">
           
           <% if (m.message) { %>
             <p><%= m.message %></p>
@@ -250,9 +249,6 @@ flex: 1;
     </form>
   </div>
 
-  <!-- الكود الخاص بالـCanvas يمكن أن تبقيه أو تحذفيه حسب حاجتك -->
-  <canvas id="interactiveCanvas"></canvas>
-
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
@@ -264,152 +260,49 @@ flex: 1;
     socket.emit('register', myId);
     socket.emit('joinConv', convId);
 
-    
+    socket.on('newMsg', m => {
+      const div = document.createElement('div');
+      div.className = String(m.sender) === myId ? 'sent' : 'recv';
 
-      socket.on('newMsg', m => {
-  const div = document.createElement('div');
-  div.className = String(m.sender) === myId ? 'sent' : 'recv';
+      // ✅ استخدام متغيرات CSS مباشرة
+      div.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--chat-bg-color');
+      div.style.color = getComputedStyle(document.documentElement).getPropertyValue('--chat-text-color');
 
-  // ✅ استخدام متغيرات CSS مباشرة
-  div.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--chat-bg-color');
-  div.style.color = getComputedStyle(document.documentElement).getPropertyValue('--chat-text-color');
-function linkify(text) {
-  const urlPattern = /(\bhttps?:\/\/[^\s]+)/g;
-  return text.replace(urlPattern, url => `<a href="${url}" target="_blank" style="color: blue;">${url}</a>`);
-}
-
-// عند تلقي رسالة جديدة...
-div.innerHTML = linkify(m.message) + ` <small>${new Date(m.createdAt).toLocaleTimeString()}</small>`;
-
-//  div.innerHTML = `${m.message} <small>${new Date(m.createdAt).toLocaleTimeString()}</small>`;
-
-  const sentimentDiv = document.createElement('div');
-  sentimentDiv.classList.add('sentiment');
-
-  if (m.emotion === 'حب') {
-    sentimentDiv.innerHTML = '<span style="color:pink;">💖 Love</span>';
-  } else if (m.emotion === 'إيجابي') {
-    sentimentDiv.innerHTML = '<span style="color:green;">😊 Positive</span>';
-  } else if (m.emotion === 'ممتن') {
-    sentimentDiv.innerHTML = '<span style="color:blue;">🙏 Grateful</span>';
-  } else if (m.emotion === 'غضب') {
-    sentimentDiv.innerHTML = '<span style="color:red;">😡 Angry</span>';
-  } else if (m.emotion === 'سلبي') {
-    sentimentDiv.innerHTML = '<span style="color:red;">😞 Negative</span>';
-  } else {
-    sentimentDiv.innerHTML = '<span style="color:gray;">😐 Neutral</span>';
-  }
-
-  div.appendChild(sentimentDiv);
-  msgsContainer.appendChild(div);
-  msgsContainer.scrollTop = msgsContainer.scrollHeight;
-});
-
-    })();
-
-    // Background Particle Effect
-    const canvas = document.getElementById('interactiveCanvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    function drawParticles() {
-      const particles = [];
-      for (let i = 0; i < 200; i++) {
-        particles.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          size: Math.random() * 3 + 1,
-          speedX: Math.random() * 2 - 1,
-          speedY: Math.random() * 2 - 1,
-          color: 'rgba(72, 88, 235, 0.5)',
-        });
+      function linkify(text) {
+        const urlPattern = /(\bhttps?:\/\/[^\s]+)/g;
+        return text.replace(urlPattern, url => `<a href="${url}" target="_blank" style="color: blue;">${url}</a>`);
       }
 
-      function updateParticles() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        particles.forEach((particle, index) => {
-          particle.x += particle.speedX;
-          particle.y += particle.speedY;
+      // عند تلقي رسالة جديدة...
+      div.innerHTML = linkify(m.message) + ` <small>${new Date(m.createdAt).toLocaleTimeString()}</small>`;
 
-          if (particle.x < 0 || particle.x > canvas.width || particle.y < 0 || particle.y > canvas.height) {
-            particles[index] = {
-              x: Math.random() * canvas.width,
-              y: Math.random() * canvas.height,
-              size: Math.random() * 3 + 1,
-              speedX: Math.random() * 2 - 1,
-              speedY: Math.random() * 2 - 1,
-              color: 'rgba(72, 88, 235, 0.5)',
-            };
-          }
+      const sentimentDiv = document.createElement('div');
+      sentimentDiv.classList.add('sentiment');
 
-          ctx.beginPath();
-          ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-          ctx.fillStyle = particle.color;
-          ctx.fill();
-        });
-
-        requestAnimationFrame(updateParticles);
+      if (m.emotion === 'حب') {
+        sentimentDiv.innerHTML = '<span style="color:pink;">💖 Love</span>';
+      } else if (m.emotion === 'إيجابي') {
+        sentimentDiv.innerHTML = '<span style="color:green;">😊 Positive</span>';
+      } else if (m.emotion === 'ممتن') {
+        sentimentDiv.innerHTML = '<span style="color:blue;">🙏 Grateful</span>';
+      } else if (m.emotion === 'غضب') {
+        sentimentDiv.innerHTML = '<span style="color:red;">😡 Angry</span>';
+      } else if (m.emotion === 'سلبي') {
+        sentimentDiv.innerHTML = '<span style="color:red;">😞 Negative</span>';
+      } else {
+        sentimentDiv.innerHTML = '<span style="color:gray;">😐 Neutral</span>';
       }
 
-      updateParticles();
-    }
-
-    drawParticles();
+      div.appendChild(sentimentDiv);
+      const msgsContainer = document.getElementById('msgs');
+      msgsContainer.appendChild(div);
+      msgsContainer.scrollTop = msgsContainer.scrollHeight;
+    });
   </script>
+
    
 
-      <script>
-        const theme = <%- JSON.stringify(currentUser?.themeSettings || {}) %>;
 
-for (const [key, val] of Object.entries(theme)) {
-  document.documentElement.style.setProperty('--' + key.replace(/([A-Z])/g, "-$1").toLowerCase(), val);
-}
-
-      </script>
-      <script>
-  // مثال لو كانت إعدادات المستخدم تحتوي على الألوان
-  const themeSettings = {
-    chatTextColor: "#ff6347", // احصل على اللون من السيرفر
-    chatBgColor: "#f5f5f5"
-  };
-
-  // تطبيق اللون في الصفحة بشكل ديناميكي
-  document.documentElement.style.setProperty('--chat-text-color', themeSettings.chatTextColor);
-  document.documentElement.style.setProperty('--chat-bg-color', themeSettings.chatBgColor);
-</script>
-<script>
-  const fileInput = document.getElementById('fileInput');
-  const previewContainer = document.getElementById('previewContainer');
-
-  fileInput.addEventListener('change', function () {
-    const file = this.files[0];
-    previewContainer.innerHTML = ''; // إزالة المعاينة القديمة
-
-    if (!file) return;
-
-    const fileURL = URL.createObjectURL(file);
-
-    if (file.type.startsWith('image/')) {
-      const img = document.createElement('img');
-      img.src = fileURL;
-      previewContainer.appendChild(img);
-    } else if (file.type.startsWith('video/')) {
-      const video = document.createElement('video');
-      video.src = fileURL;
-      video.controls = true;
-      previewContainer.appendChild(video);
-    }
-  });
-
-
-
-document.getElementById('fileInput').addEventListener('change', function () {
-  const file = this.files[0];
-  document.getElementById('fileName').textContent = file ? file.name : 'No file chosen';
-});
-
-</script>
 <style>
   .upload-form {
     display: flex;
@@ -471,6 +364,7 @@ document.getElementById('fileInput').addEventListener('change', function () {
 
 </body>
 </html>
+
 
 
 
