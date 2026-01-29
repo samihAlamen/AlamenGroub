@@ -41,6 +41,12 @@ exports.show = async (req, res) => {
     // جلب الرسائل المتعلقة بالمحادثة
     const msgs = await Message.find({ conversation: conv.id }).sort('createdAt').lean();
 
+    // جلب الطالب إذا كان موجودًا
+    let student;
+    if (conv.student) {
+      student = await User.findById(conv.student);  // جلب الطالب باستخدام الحقل 'student'
+    }
+
     // نحدد الشخص الآخر في المحادثة
     const otherParticipant = conv.participants.find(p => !p.id.equals(req.user.id));
     if (!otherParticipant) {
@@ -53,6 +59,7 @@ exports.show = async (req, res) => {
       messages: msgs,
       user: req.user,
       otherUser: otherParticipant,
+      student: student,  // تمرير الطالب إلى العرض
     });
 
   } catch (err) {
@@ -60,4 +67,5 @@ exports.show = async (req, res) => {
     res.status(500).send('A server error occurred.');
   }
 };
+
 
