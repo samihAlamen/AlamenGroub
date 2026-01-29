@@ -24,19 +24,31 @@ router.get(
   ensureRole("admin"),
   async (req, res) => {
     try {
-      // جلب معلومات الأدمن
-      const userAdmin = await User.findById(req.user._id); // التأكد من وجود الـ await
+      // تحقق من أن `req.user` يحتوي على البيانات الصحيحة
+      if (!req.user || !req.user._id) {
+        return res.status(401).send("User not authenticated or user ID missing");
+      }
+
+      const userAdmin = await User.findById(req.user._id);
+      
+      // تحقق من أن البيانات الخاصة بالأدمن موجودة
+      if (!userAdmin) {
+        return res.status(404).send("Admin not found");
+      }
+
+      // عرض الصفحة مع بيانات الأدمن
       res.render("admin/dashboard", {
         title: "Admin Dashboard",
         user: req.user,
-        profileUser: userAdmin // تمرير معلومات الأدمن إلى الصفحة
+        profileUser: userAdmin, // تمرير بيانات الأدمن إلى الصفحة
       });
     } catch (err) {
       console.error(err);
-      res.status(500).send("Internal Server Error"); // التعامل مع الاستثناءات
+      res.status(500).send("Internal Server Error");
     }
   }
 );
+
 
 // Sub routes for scholarships and applications
 router.use(
@@ -54,4 +66,5 @@ router.use(
 );
 
 module.exports = router;
+
 
