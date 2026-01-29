@@ -1,6 +1,7 @@
 // routes/admin/index.js
 const express = require("express");
 const router = express.Router();
+const User = require("../../models/User");  // تعديل المسار حسب المكان الذي يوجد فيه الموديل
 
 const { ensureAuth, ensureRole } = require("../../middlewares/auth");
 
@@ -53,3 +54,4 @@ router.use(
 );
 
 module.exports = router;
+
