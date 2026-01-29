@@ -26,7 +26,7 @@ router.get(
     res.render("admin/dashboard", {
   title: "Admin Dashboard",
   user: req.user,
-      userAdmin
+      profileUser: userAdmin
 });
 
   }
@@ -48,4 +48,5 @@ router.use(
 );
 
 module.exports = router;
+
 
