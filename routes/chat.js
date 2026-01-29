@@ -5,6 +5,7 @@ const { imageStorage, videoStorage } = require('../config/cloudinary');
 const chatController = require('../controllers/chatController');
 const Message = require('../models/Message');
 const Conversation = require('../models/Conversation');
+const { ensureAuth } = require('../middlewares/auth'); // استيراد الميدلوير
 
 
 // عرض المحادثات
@@ -13,10 +14,16 @@ router.get('/conversations', chatController.list);
 // عرض شات معين
 router.get('/chat/:userId', chatController.show);
 
-router.post('/chat/send/:userId', async (req, res) => {
+
+router.post('/chat/send/:userId', ensureAuth, async (req, res) => {
   try {
     const { userId } = req.params;
-    
+
+    // تأكد أن req.user موجود قبل المتابعة
+    if (!req.user || !req.user._id) {
+      return res.status(400).send('User not authenticated.');
+    }
+
     // العثور على المحادثة أو إنشائها إذا لم تكن موجودة
     const conv = await Conversation.findOneAndUpdate(
       { participants: { $all: [req.user._id, userId] } },
@@ -42,5 +49,6 @@ router.post('/chat/send/:userId', async (req, res) => {
 
 
 module.exports = router;
+
 
 
