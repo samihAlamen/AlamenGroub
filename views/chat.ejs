@@ -213,7 +213,7 @@ flex: 1;
 
     <div id="msgs">
       <% messages.forEach(m => { 
-        const isSent = String(m.sender) === String(user._id);
+        const isSent = String(m.sender) === String(user.id);
       %>
         <div class="<%= isSent ? 'sent' : 'recv' %> chat-box" style="background-color: var(--chat-bg-color); color: var(--chat-text-color);">
           
@@ -253,9 +253,9 @@ flex: 1;
   <script>
     const socket = io();
 
-    const myId = '<%= user._id %>';
-    const otherId = '<%= otherUser._id %>';
-    const convId = '<%= conversation._id %>';
+    const myId = '<%= user.id %>';
+    const otherId = '<%= otherUser.id %>';
+    const convId = '<%= conversation.id %>';
 
     socket.emit('register', myId);
     socket.emit('joinConv', convId);
@@ -364,6 +364,7 @@ flex: 1;
 
 </body>
 </html>
+
 
 
 
