@@ -13,7 +13,34 @@ router.get('/conversations', chatController.list);
 // عرض شات معين
 router.get('/chat/:userId', chatController.show);
 
+router.post('/chat/send/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    // العثور على المحادثة أو إنشائها إذا لم تكن موجودة
+    const conv = await Conversation.findOneAndUpdate(
+      { participants: { $all: [req.user._id, userId] } },
+      {},
+      { new: true, upsert: true }
+    );
+    
+    // إرسال الرسالة النصية فقط
+    await Message.create({
+      sender: req.user._id,
+      receiver: userId,
+      conversation: conv._id,
+      message: req.body.message || ''
+    });
+    
+    // إعادة توجيه المستخدم إلى صفحة الدردشة مع الشخص الآخر
+    res.redirect(`/chat/${userId}`);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Message sending failed');
+  }
+});
 
 
 module.exports = router;
+
 
