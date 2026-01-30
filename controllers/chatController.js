@@ -43,8 +43,8 @@ exports.show = async (req, res) => {
       // إذا لم تكن المحادثة موجودة، نقوم بإنشائها
       conv = await Conversation.create({
         participants: [
-          { user: req.user.id, role: 'admin' },
-          { user: otherUserId, role: 'user' }
+          { user: req.user.id, role: req.user.role === 'admin' ? 'admin' : 'user' },
+          { user: otherUserId, role: req.user.role === 'admin' ? 'user' : 'admin' }
         ],
         student: otherUserId,
         admin: req.user.id
@@ -66,7 +66,7 @@ exports.show = async (req, res) => {
       conversation: conv,
       messages: msgs,
       user: req.user,
-      otherUser: otherParticipant.user // تأكد من أنه الـ .user هنا
+      otherUser: otherParticipant.user
     });
   } catch (err) {
     console.error(err);
@@ -90,3 +90,4 @@ exports.create = async (req, res) => {
     res.status(500).send('Failed to create conversation');
   }
 };
+
