@@ -1,15 +1,17 @@
 <h2>Conversations</h2>
 <div class="conversations-list">
-  <% conversations.forEach(conversation => { %>
-    <div class="conversation">
-      <a href="/chat/<%= conversation.participants.find(p => p._id.toString() !== user.id.toString())._id %>">
-        <img src="<%= conversation.participants.find(p => p._id.toString() !== user.id.toString()).avatar %>" alt="User Avatar" class="avatar" />
-        <span><%= conversation.participants.find(p => p._id.toString() !== user.id.toString()).username %></span>
-      </a>
-    </div>
-  <% }) %>
-<a href="/chat/6978dffff98e1a0bbeac1284" class="btn btn-primary">Chat with User</a>
-
+  <% if (user.role === 'admin') { %>
+    <!-- إذا كان المستخدم أدمن، عرض جميع المحادثات مع الطلاب -->
+    <% conversations.forEach(conversation => { %>
+      <div class="conversation">
+        <a href="/chat/<%= conversation.participants.find(p => p._id.toString() !== user.id.toString())._id %>">
+          <img src="<%= conversation.participants.find(p => p._id.toString() !== user.id.toString()).avatar %>" alt="User Avatar" class="avatar" />
+          <span><%= conversation.participants.find(p => p._id.toString() !== user.id.toString()).username %></span>
+        </a>
+      </div>
+    <% }) %>
+  <% } else { %>
+    <!-- إذا كان المستخدم طالب، عرض رابط الدردشة فقط مع الأدمن -->
+    <a href="/chat/6978dffff98e1a0bbeac1284" class="btn btn-primary">Chat with Admin</a>
+  <% } %>
 </div>
-
-
