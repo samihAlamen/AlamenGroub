@@ -86,59 +86,38 @@
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
-  <script>
+<script>
     const socket = io();
 
-    const myId = '<%= user.id %>';
-    const otherId = '<%= otherUser.id %>';
-    const convId = '<%= conversation.id %>';
+    // عند الاتصال، إعلام الخادم بأن المستخدم متصل
+    socket.emit('userConnected', '<%= user.id %>');
 
-    socket.emit('userConnected', myId);
-    socket.emit('joinConv', convId);
+    // عند إرسال رسالة
+    function sendMessage() {
+        const messageText = document.getElementById('messageInput').value;
+        const receiverId = '<%= otherUser.id %>'; // يجب أن تأخذ هذا من واجهة المستخدم
+        const senderId = '<%= user.id %>';
 
-    // عند تلقي رسالة جديدة من الـ WebSocket
-    socket.on('newMessage', m => {
-      const div = document.createElement('div');
-      div.className = String(m.sender) === myId ? 'sent' : 'recv';
+        socket.emit('sendMessage', {
+            senderId,
+            receiverId,
+            messageText
+        });
 
-      // استخدام متغيرات CSS مباشرة من الـ document
-      div.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--chat-bg-color');
-      div.style.color = getComputedStyle(document.documentElement).getPropertyValue('--chat-text-color');
+        document.getElementById('messageInput').value = ''; // إفراغ حقل الإدخال بعد الإرسال
+    }
 
-      // دالة لروابط في النصوص
-      function linkify(text) {
-        const urlPattern = /(\bhttps?:\/\/[^\s]+)/g;
-        return text.replace(urlPattern, url => `<a href="${url}" target="_blank" style="color: blue;">${url}</a>`);
-      }
-
-      // إضافة النص الجديد مع الوقت
-      div.innerHTML = linkify(m.message) + ` <small>${new Date(m.createdAt).toLocaleTimeString()}</small>`;
-
-      // إضافة تحليل المشاعر
-      const sentimentDiv = document.createElement('div');
-      sentimentDiv.classList.add('sentiment');
-
-      if (m.emotion === 'حب') {
-        sentimentDiv.innerHTML = '<span style="color:pink;">💖 Love</span>';
-      } else if (m.emotion === 'إيجابي') {
-        sentimentDiv.innerHTML = '<span style="color:green;">😊 Positive</span>';
-      } else if (m.emotion === 'ممتن') {
-        sentimentDiv.innerHTML = '<span style="color:blue;">🙏 Grateful</span>';
-      } else if (m.emotion === 'غضب') {
-        sentimentDiv.innerHTML = '<span style="color:red;">😡 Angry</span>';
-      } else if (m.emotion === 'سلبي') {
-        sentimentDiv.innerHTML = '<span style="color:red;">😞 Negative</span>';
-      } else {
-        sentimentDiv.innerHTML = '<span style="color:gray;">😐 Neutral</span>';
-      }
-
-      div.appendChild(sentimentDiv);
-
-      // إضافة الرسالة إلى الواجهة
-      const msgsContainer = document.getElementById('msgs');
-      msgsContainer.appendChild(div);
-      msgsContainer.scrollTop = msgsContainer.scrollHeight; // التمرير التلقائي للأسفل
+    // استقبال الرسائل الجديدة عبر WebSocket
+    socket.on('newMessage', (message) => {
+        const messagesContainer = document.getElementById('messages');
+        const div = document.createElement('div');
+        div.className = message.sender === '<%= user.id %>' ? 'sent' : 'recv';
+        div.innerHTML = `<p>${message.text}</p><small>${new Date(message.createdAt).toLocaleTimeString()}</small>`;
+        messagesContainer.appendChild(div);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight; // التمرير التلقائي
     });
-  </script>
+</script>
+
 </body>
 </html>
+
