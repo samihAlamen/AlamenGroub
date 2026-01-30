@@ -39,7 +39,9 @@ exports.show = async (req, res) => {
   try {
     const otherUserId = req.params.userId;
     const other = await User.findById(otherUserId);
-    if (!other) return res.status(404).send('User not found');
+    if (!other) {
+      return res.status(404).send('User not found');
+    }
 
     // جلب المحادثة بين الأدمن والطالب
     let conv = await Conversation.findOne({
@@ -61,11 +63,17 @@ exports.show = async (req, res) => {
     const msgs = await Message.find({ conversation: conv.id }).sort('createdAt').lean();
     const otherParticipant = conv.participants.find(p => !p.user.equals(req.user.id));
 
+    // التأكد من أن الـ otherUser موجود
+    if (!otherParticipant) {
+      return res.status(400).send('The other party cannot be found in the conversation.');
+    }
+
+    // تمرير المتغيرات إلى الـ EJS
     res.render('chat', {
       conversation: conv,
       messages: msgs,
       user: req.user,
-      otherUser: otherParticipant,
+      otherUser: otherParticipant.user // يجب أن يكون .user هنا
     });
 
   } catch (err) {
@@ -73,6 +81,7 @@ exports.show = async (req, res) => {
     res.status(500).send('A server error occurred.');
   }
 };
+
 
 
 
