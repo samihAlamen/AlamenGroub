@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>دردشات الطلاب</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('partials/header') %>
+  <div class="admin-chat-container">
+    <h2>دردشات الطلاب</h2>
+    <ul>
+      <% conversations.forEach(function(conversation) { %>
+        <li>
+          <a href="/admin/chat/<%= conversation._id %>">
+            دردشة مع الطالب: <%= conversation.user.name %>
+          </a>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+  <%- include('partials/footer') %>
+</body>
+</html>
