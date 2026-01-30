@@ -15,16 +15,24 @@ router.get('/chat', ensureAuth, ensureRole('user'), async (req, res) => {
   res.render('chat', { conversation });
 });
 
-// دردشة المدير مع الطالب
-// دردشة المدير مع الطالب
 router.get('/admin-chat', ensureAuth, ensureRole('admin'), async (req, res) => {
-  const conversations = await Conversation.find()
-    .populate('user') // تأكد من جلب بيانات المستخدم أيضًا
-    .populate('messages'); // جلب الرسائل المرتبطة بالمحادثة
+  try {
+    const conversations = await Conversation.find()
+      .populate('user') // تأكد من جلب بيانات المستخدم أيضًا
+      .populate('messages'); // جلب الرسائل المرتبطة بالمحادثة
 
-  res.render('admin-chat', { conversations });
+    // التأكد من أن كل المحادثات تحتوي على المستخدم
+    const validConversations = conversations.filter(conversation => conversation.user);
+
+    res.render('admin-chat', { conversations: validConversations });
+  } catch (err) {
+    console.error('Error fetching conversations:', err);
+    res.status(500).send('خطأ في تحميل المحادثات');
+  }
 });
 
+
 module.exports = router;
+
 
 
