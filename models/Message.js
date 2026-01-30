@@ -8,6 +8,8 @@ const messageSchema = new mongoose.Schema({
   message: { type: String, required: false },  // محتوى الرسالة
   sentimentScore: { type: Number },  // تقييم الشعور
   emotion: { type: String }, // الشعور
+    text: { type: String, required: true }, // محتوى الرسالة
+
   messageId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false }, // معرّف رسالة مرجعية
   attachmentPath: String,  // مسار المرفق (إن وجد)
   attachmentType: { type: String, enum: ['image', 'video', 'file'], default: null },  // نوع المرفق
@@ -15,3 +17,4 @@ const messageSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('Message', messageSchema);
+
