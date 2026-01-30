@@ -4,6 +4,7 @@ const router = express.Router();
 const User = require("../../models/User");  // تعديل المسار حسب المكان الذي يوجد فيه الموديل
 const Chat = require("../../models/Chat"); // تأكد من أنك تستخدم الموديل الصحيح الخاص بالدردشات
 const { ensureAuth, ensureRole } = require("../../middlewares/auth");
+const Scholarship = require("../../models/Scholarship");
 
 const scholarshipRoutes = require("./scholarships");
 const applicationRoutes = require("./applications");
@@ -82,6 +83,7 @@ router.use(
 );
 
 module.exports = router;
+
 
 
 
