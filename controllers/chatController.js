@@ -43,23 +43,23 @@ exports.show = async (req, res) => {
 
     // جلب المحادثة بين الأدمن والطالب
     let conv = await Conversation.findOne({
-      participants: { $all: [req.user.id, otherUserId] }
-    }).populate('participants', 'username avatar');
+      'participants.user': { $all: [req.user.id, otherUserId] }
+    }).populate('participants.user', 'username avatar');
 
     if (!conv) {
       // إذا لم تكن المحادثة موجودة، نقوم بإنشائها
-      conv = await Conversation.create({ participants: [req.user.id, otherUserId] });
-      conv = await Conversation.findById(conv.id).populate('participants', 'username avatar');
+      conv = await Conversation.create({
+        participants: [
+          { user: req.user.id, role: 'admin' },
+          { user: otherUserId, role: 'user' }
+        ],
+        student: otherUserId,
+        admin: req.user.id
+      });
     }
 
-    // جلب الرسائل المرتبطة بالمحادثة
     const msgs = await Message.find({ conversation: conv.id }).sort('createdAt').lean();
-
-    // تحديد الشخص الآخر في المحادثة
-    const otherParticipant = conv.participants.find(p => !p._id.equals(req.user.id));
-    if (!otherParticipant) {
-      return res.status(400).send('The other party cannot be found in the conversation.');
-    }
+    const otherParticipant = conv.participants.find(p => !p.user.equals(req.user.id));
 
     res.render('chat', {
       conversation: conv,
