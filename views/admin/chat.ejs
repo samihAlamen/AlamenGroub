@@ -30,6 +30,7 @@
   <script>
     const socket = io();
     const userId = "<%= conversation.user.id %>";  // المستخدم الذي تم تحديده للمحادثة
+    const conversationId = "<%= conversation.id %>"; // تحديد معرف المحادثة
 
     // بدء الدردشة
     socket.emit('start-chat', userId);
@@ -38,8 +39,8 @@
     document.getElementById('send-btn').addEventListener('click', () => {
       const message = document.getElementById('message-input').value;
       if (message) {
-        socket.emit('send-message', { 
-          userId, 
+        socket.emit('admin-send-message', { 
+          conversationId, 
           message, 
           sender: 'admin'  // لأن الادمن هو الذي يرسل الرد
         });
@@ -53,11 +54,16 @@
       messageElement.className = message.sender === 'admin' ? 'message admin' : 'message user';
       messageElement.innerHTML = `
         <span>${message.content}</span>
-        <small>${message.sentAt}</small>
+        <small>${formatDate(message.sentAt)}</small>
       `;
       document.querySelector('.messages').appendChild(messageElement);
     });
+
+    // دالة لتنسيق التاريخ (اختياري، إذا لم يكن موجوداً من الخادم)
+    function formatDate(date) {
+      const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+      return new Date(date).toLocaleDateString('ar-SA', options);
+    }
   </script>
 </body>
 </html>
-
