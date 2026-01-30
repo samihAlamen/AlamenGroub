@@ -1,16 +1,14 @@
 const mongoose = require('mongoose');
-const ObjectId = mongoose.Schema.Types.ObjectId;
 
 const conversationSchema = new mongoose.Schema({
- participants: [{
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    role: { type: String, enum: ['user', 'admin'], required: true }
-  }],
-  student: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false },  // الطالب
-  admin: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },  // الادمن
-  messages: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Message' }],  // الرسائل المتعلقة بالمحادثة
-  createdAt: { type: Date, default: Date.now }  // تاريخ إنشاء المحادثة
+  participants: [{ user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, role: { type: String, enum: ['admin', 'user'] } }],
+  student: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // معرف الطالب
+  admin: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // معرف الأدمن
+  messages: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Message' }], // الرسائل المرتبطة بالمحادثة
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model('Conversation', conversationSchema);
+const Conversation = mongoose.model('Conversation', conversationSchema);
 
+module.exports = Conversation;
