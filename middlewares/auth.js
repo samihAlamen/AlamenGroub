@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-// Middleware للتحقق من تسجيل الدخول
 const ensureAuth = (req, res, next) => {
     if (req.session && req.session.user) {
         req.user = req.session.user; // توحيد المصدر
@@ -10,8 +9,7 @@ const ensureAuth = (req, res, next) => {
     return res.redirect('/auth/login');
 };
 
-
-// Middleware للتأكد أن المستخدم **غير مسجل دخول**
+// Middleware للتأكد أن المستخدم غير مسجل دخول
 const ensureGuest = (req, res, next) => {
     if (req.session?.user) {
         return res.redirect('/dashboard');
@@ -30,3 +28,4 @@ const ensureRole = (...allowedRoles) => {
 };
 
 module.exports = { ensureAuth, ensureGuest, ensureRole };
+
