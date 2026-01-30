@@ -7,19 +7,17 @@
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <%- include('partials/header') %>
   <div class="admin-chat-container">
     <h2>دردشات الطلاب</h2>
     <ul>
       <% conversations.forEach(function(conversation) { %>
         <li>
-          <a href="/admin/chat/<%= conversation._id %>">
+          <a href="/admin/chat/<%= conversation.id %>">
             دردشة مع الطالب: <%= conversation.user.name %>
           </a>
         </li>
       <% }) %>
     </ul>
   </div>
-  <%- include('partials/footer') %>
 </body>
 </html>
