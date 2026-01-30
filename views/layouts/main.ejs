@@ -179,7 +179,7 @@
                     <div class="d-flex align-items-center gap-2">
                         <span class="text-white small">مرحبًا، <strong><%= currentUser.name %></strong></span>
                         <% if(currentUser.role === 'admin'){ %>
-                            <a href="/admin/dashboard" class="btn btn-warning btn-sm">لوحة التحكم</a>
+                            <a href="/admin" class="btn btn-warning btn-sm">لوحة التحكم</a>
                         <% } %>
                         <a href="/notifications" class="btn btn-outline-light btn-sm">🔔</a>
                         <a href="/auth/logout" class="btn btn-light btn-sm">تسجيل الخروج</a>
@@ -253,6 +253,7 @@
 
 </body>
 </html>
+
 
 
 
