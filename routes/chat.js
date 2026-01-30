@@ -1,12 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const auth = require('../middlewares/auth');
-const { isAdmin, isStudent } = require('../middlewares/roles');
+const { ensureAuth, ensureRole } = require('../middlewares/auth'); // تحديث مع الـ middleware الخاص بك
 const Conversation = require('../models/Conversation');
 const Message = require('../models/ChatMessage');
 
 // صفحة الدردشة العامة
-router.get('/chat', auth, isStudent, async (req, res) => {
+router.get('/chat', ensureAuth, ensureRole('student'), async (req, res) => {
   const userId = req.user._id;
   let conversation = await Conversation.findOne({ user: userId }).populate('messages');
   if (!conversation) {
@@ -17,7 +16,7 @@ router.get('/chat', auth, isStudent, async (req, res) => {
 });
 
 // دردشة المدير مع الطالب
-router.get('/admin-chat', auth, isAdmin, async (req, res) => {
+router.get('/admin-chat', ensureAuth, ensureRole('admin'), async (req, res) => {
   const conversations = await Conversation.find().populate('messages');
   res.render('admin-chat', { conversations });
 });
