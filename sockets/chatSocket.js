@@ -21,21 +21,29 @@ module.exports = function (server) {
                 text: messageText,
                 sender: senderId,
                 receiver: receiverId,
+                createdAt: new Date(),
             });
 
             await message.save();
 
-            // التحقق من وجود محادثة
+            // التحقق من وجود محادثة بين المرسل والمستقبل
             let conversation = await Conversation.findOne({
-                participants: { $all: [senderId, receiverId] },
+                'participants.user': { $all: [senderId, receiverId] },
             });
 
             if (!conversation) {
+                // إنشاء محادثة جديدة إذا لم توجد
                 conversation = new Conversation({
-                    participants: [senderId, receiverId],
+                    participants: [
+                        { user: senderId, role: 'admin' }, // أو 'user' بناءً على الدور
+                        { user: receiverId, role: 'user' }  // 'user' للطرف الآخر
+                    ],
+                    student: receiverId,
+                    admin: senderId,
                     messages: [message._id],
                 });
             } else {
+                // إضافة الرسالة إلى المحادثة الحالية
                 conversation.messages.push(message._id);
             }
 
