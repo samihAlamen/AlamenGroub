@@ -5,7 +5,7 @@ const Conversation = require('../models/Conversation');
 const Message = require('../models/ChatMessage');
 
 // صفحة الدردشة العامة
-router.get('/chat', ensureAuth, ensureRole('student'), async (req, res) => {
+router.get('/chat', ensureAuth, ensureRole('user'), async (req, res) => {
   const userId = req.user._id;
   let conversation = await Conversation.findOne({ user: userId }).populate('messages');
   if (!conversation) {
@@ -16,9 +16,14 @@ router.get('/chat', ensureAuth, ensureRole('student'), async (req, res) => {
 });
 
 // دردشة المدير مع الطالب
+// دردشة المدير مع الطالب
 router.get('/admin-chat', ensureAuth, ensureRole('admin'), async (req, res) => {
-  const conversations = await Conversation.find().populate('messages');
+  const conversations = await Conversation.find()
+    .populate('user') // تأكد من جلب بيانات المستخدم أيضًا
+    .populate('messages'); // جلب الرسائل المرتبطة بالمحادثة
+
   res.render('admin-chat', { conversations });
 });
 
 module.exports = router;
+
