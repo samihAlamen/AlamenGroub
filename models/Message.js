@@ -2,8 +2,8 @@ const mongoose = require('mongoose');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
 const messageSchema = new mongoose.Schema({
-  sender: { type: ObjectId, required: false, ref: 'User' },    // المرسل (الطالب أو الادمن)
-  receiver: { type: ObjectId, required: false, ref: 'User' },  // المستقبل (الطالب أو الادمن)
+  sender: { type: ObjectId, required: true, ref: 'User' },    // المرسل (الطالب أو الادمن)
+  receiver: { type: ObjectId, required: true, ref: 'User' },  // المستقبل (الطالب أو الادمن)
   conversation: { type: ObjectId, required: true, ref: 'Conversation' }, // معرّف المحادثة
   message: { type: String, required: false },  // محتوى الرسالة
   sentimentScore: { type: Number },  // تقييم الشعور
@@ -17,5 +17,6 @@ const messageSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('Message', messageSchema);
+
 
 
