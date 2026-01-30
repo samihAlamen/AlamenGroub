@@ -13,7 +13,7 @@
     <div id="chat-box">
       <div class="messages">
         <% conversation.messages.forEach(function(message) { %>
-          <div class="message <%= message.sender === 'admin' ? 'admin' : 'student' %>">
+          <div class="message <%= message.sender === 'admin' ? 'admin' : 'user' %>">
             <span><%= message.content %></span>
             <small><%= formatDate(message.sentAt) %></small>
           </div>
@@ -50,7 +50,7 @@
     // استقبال الرسائل من الخادم
     socket.on('receive-message', (message) => {
       const messageElement = document.createElement('div');
-      messageElement.className = message.sender === 'admin' ? 'message admin' : 'message student';
+      messageElement.className = message.sender === 'admin' ? 'message admin' : 'message user';
       messageElement.innerHTML = `
         <span>${message.content}</span>
         <small>${message.sentAt}</small>
@@ -60,3 +60,4 @@
   </script>
 </body>
 </html>
+
