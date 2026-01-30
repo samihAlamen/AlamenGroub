@@ -8,55 +8,47 @@ const initSocket = (server) => {
   io = socketIO(server);
 
   io.on('connection', (socket) => {
-    console.log('User connected: ' + socket.id);
+    console.log('Connected:', socket.id);
 
-    // عندما يبدأ الطالب الدردشة مع الادمن
-    socket.on('start-chat', async (userId) => {
-  let conversation = await Conversation.findOne({ participants: userId });
-  if (!conversation) {
-    conversation = new Conversation({ participants: [userId], messages: [] });
-    await conversation.save();
-  }
-  socket.join(conversation.id.toString());
-});
-
-
-   socket.on('send-message', async (data) => {
-  const { userId, message } = data;
-  const conversation = await Conversation.findOne({ participants: userId });
-
-  if (conversation) {
-    const newMessage = new Message({
-      conversation: conversation.id,
-      sender: userId,
-      content: message,
-      sentAt: new Date(),
-    });
-    await newMessage.save();
-    io.to(conversation.id.toString()).emit('receive-message', newMessage);
-  }
-});
-
-
-    // عندما يقوم المدير بالرد
-    socket.on('admin-send-message', async (data) => {
-      const { conversationId, message } = data;
-      const newMessage = new Message({
-        conversation: conversationId,
-        sender: 'admin', // لا يوجد ID للادمن
-        content: message,
-        sentAt: new Date(),
+    // الانضمام أو إنشاء محادثة
+    socket.on('join-conversation', async ({ userId, adminId }) => {
+      let conversation = await Conversation.findOne({
+        participants: { $all: [userId, adminId] }
       });
-      await newMessage.save();
-      io.to(conversationId).emit('receive-message', newMessage);
+
+      if (!conversation) {
+        conversation = new Conversation({
+          participants: [userId, adminId]
+        });
+        await conversation.save();
+      }
+
+      socket.join(conversation.id);
+      socket.emit('conversation-joined', conversation);
+    });
+
+    // إرسال رسالة
+    socket.on('send-message', async ({ conversationId, senderId, text }) => {
+      const message = new Message({
+        conversation: conversationId,
+        sender: senderId,
+        text
+      });
+
+      await message.save();
+
+      await Conversation.findByIdAndUpdate(conversationId, {
+        lastMessage: text,
+        updatedAt: new Date()
+      });
+
+      io.to(conversationId).emit('receive-message', message);
     });
 
     socket.on('disconnect', () => {
-      console.log('User disconnected: ' + socket.id);
+      console.log('Disconnected:', socket.id);
     });
   });
 };
 
 module.exports = initSocket;
-
-
