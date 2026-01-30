@@ -1,12 +1,18 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-// Schema for the User model
 const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
       required: true,
+      trim: true,
+    },
+
+    username: {
+      type: String,
+      required: true,
+      unique: true,
       trim: true,
     },
 
@@ -22,10 +28,13 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-  username: { type: String, required: true },
 
-    role: { type: String, enum: ['admin', 'user'], required: true }, // admin or user
-  avatar: { type: String }, // رابط الصورة الشخصية
+    role: {
+      type: String,
+      enum: ['admin', 'user'],
+      default: 'user',
+    },
+
     profile: {
       phone: String,
       country: String,
@@ -35,7 +44,6 @@ const userSchema = new mongoose.Schema(
       avatar: String,
     },
 
-    // المنح التي قدّم عليها المستخدم
     appliedScholarships: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -43,21 +51,18 @@ const userSchema = new mongoose.Schema(
       },
     ],
   },
-  {
-    timestamps: true, // createdAt + updatedAt تلقائيًا
-  }
+  { timestamps: true }
 );
 
-// 🔐 تشفير كلمة المرور قبل الحفظ
+// 🔐 تشفير كلمة المرور
 userSchema.pre('save', async function () {
   if (!this.isModified('password')) return;
   this.password = await bcrypt.hash(this.password, 10);
 });
 
-// 🔍 مقارنة كلمة المرور عند تسجيل الدخول
-userSchema.methods.comparePassword = async function (candidatePassword) {
+// 🔍 مقارنة كلمة المرور
+userSchema.methods.comparePassword = function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
 module.exports = mongoose.model('User', userSchema);
-
