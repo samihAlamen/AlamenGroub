@@ -4,35 +4,27 @@ const User = require('../models/User');
 
 exports.list = async (req, res) => {
   try {
-    // التحقق من نوع المستخدم: هل هو طالب أو أدمن؟
     if (req.user.role === 'user') {
       // إذا كان طالبًا، نظهر له المحادثة مع الأدمن فقط
-      const convs = await Conversation.find({ participants: req.user.id })
-        .sort('-updatedAt')
-        .populate('participants', 'username avatar')
+      const convs = await Conversation.find({ 'participants.user': req.user.id })
+        .populate('participants.user', 'username avatar')
         .lean();
 
-      // تصفية المحادثات لعرض محادثات الطالب مع الأدمن فقط
-      const adminConversations = convs.filter(conv => conv.participants.some(p => p.role === 'admin'));
-
-      res.render('conversations', { conversations: adminConversations, user: req.user });
+      res.render('conversations', { conversations: convs, user: req.user });
     } else if (req.user.role === 'admin') {
       // إذا كان أدمن، نظهر له قائمة الطلاب الذين أرسلوا له رسائل
-      const convs = await Conversation.find({ participants: req.user.id })
-        .sort('-updatedAt')
-        .populate('participants', 'username avatar')
+      const convs = await Conversation.find({ 'participants.user': req.user.id })
+        .populate('participants.user', 'username avatar')
         .lean();
 
-      // تصفية المحادثات لعرض المحادثات مع الطلاب فقط
-      const studentConversations = convs.filter(conv => conv.participants.some(p => p.role === 'user'));
-
-      res.render('conversations', { conversations: studentConversations, user: req.user });
+      res.render('conversations', { conversations: convs, user: req.user });
     }
   } catch (err) {
     console.error(err);
     res.status(500).send('A server error occurred.');
   }
 };
+
 
 
 
@@ -81,6 +73,7 @@ exports.show = async (req, res) => {
     res.status(500).send('A server error occurred.');
   }
 };
+
 
 
 
