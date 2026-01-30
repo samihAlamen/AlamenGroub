@@ -18,26 +18,28 @@ router.post('/chat/send/:userId', ensureAuth, async (req, res) => {
   try {
     const { userId } = req.params;
 
-    // تأكد من أن المستخدم (الأدمن) مسجل الدخول
     if (!req.user || !req.user.id) {
       return res.status(400).send('User not authenticated.');
     }
 
-    // العثور على المحادثة أو إنشائها إذا لم تكن موجودة
+    // العثور على المحادثة بين المستخدمين
     let conv = await Conversation.findOne({
-      participants: { $all: [req.user.id, userId] }
+      'participants.user': { $all: [req.user.id, userId] }
     });
 
     if (!conv) {
-      // إذا كانت المحادثة غير موجودة، نقوم بإنشائها
+      // إنشاء محادثة جديدة بين الطالب والأدمن
       conv = await Conversation.create({
-        participants: [req.user.id, userId],
-        student: userId,  // تحديد الطالب في المحادثة
-        admin: req.user.id // تحديد الأدمن في المحادثة
+        participants: [
+          { user: req.user.id, role: 'admin' },
+          { user: userId, role: 'user' }
+        ],
+        student: userId,
+        admin: req.user.id
       });
     }
 
-    // إرسال الرسالة النصية فقط
+    // إرسال الرسالة
     await Message.create({
       sender: req.user.id,
       receiver: userId,
@@ -46,7 +48,7 @@ router.post('/chat/send/:userId', ensureAuth, async (req, res) => {
       createdAt: new Date(),
     });
 
-    // إعادة توجيه المستخدم إلى صفحة الدردشة مع الشخص الآخر
+    // إعادة توجيه المستخدم إلى صفحة المحادثة
     res.redirect(`/chat/${userId}`);
   } catch (err) {
     console.error(err);
@@ -55,7 +57,9 @@ router.post('/chat/send/:userId', ensureAuth, async (req, res) => {
 });
 
 
+
 module.exports = router;
+
 
 
 
