@@ -1,19 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const { imageStorage, videoStorage } = require('../config/cloudinary');
+const { ensureAuth } = require('../middlewares/auth'); // استيراد الميدلوير
 const chatController = require('../controllers/chatController');
 const Message = require('../models/Message');
 const Conversation = require('../models/Conversation');
-const { ensureAuth } = require('../middlewares/auth'); // استيراد الميدلوير
-
 
 // عرض المحادثات
 router.get('/conversations', chatController.list);
 
-// عرض شات معين
+// عرض محادثة معينة
 router.get('/chat/:userId', chatController.show);
 
+// إرسال رسالة
 router.post('/chat/send/:userId', ensureAuth, async (req, res) => {
   try {
     const { userId } = req.params;
@@ -56,9 +54,11 @@ router.post('/chat/send/:userId', ensureAuth, async (req, res) => {
   }
 });
 
+module.exports = router;
 
 
 module.exports = router;
+
 
 
 
