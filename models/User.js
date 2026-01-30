@@ -22,13 +22,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+  username: { type: String, required: true },
 
-    role: {
-      type: String,
-      enum: ['admin', 'staff', 'user'],
-      default: 'user',
-    },
-
+    role: { type: String, enum: ['admin', 'user'], required: true }, // admin or user
+  avatar: { type: String }, // رابط الصورة الشخصية
     profile: {
       phone: String,
       country: String,
@@ -63,3 +60,4 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
 };
 
 module.exports = mongoose.model('User', userSchema);
+
