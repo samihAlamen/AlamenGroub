@@ -1,123 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chat Conversation</title>
-  <style>
-    .chat-box {
-      padding: 10px;
-      margin: 5px 0;
-      border-radius: 10px;
-      max-width: 80%;
-    }
-    .sent {
-      background-color: #e0ffe0;
-      margin-left: auto;
-    }
-    .recv {
-      background-color: #f0f0f0;
-      margin-right: auto;
-    }
-    .sentiment {
-      margin-top: 5px;
-      font-size: 0.9em;
-    }
-    .sentiment span {
-      padding: 2px 5px;
-      border-radius: 5px;
-    }
-    .message-form input {
-      width: 80%;
-      padding: 8px;
-      margin-right: 10px;
-      border-radius: 5px;
-    }
-    .message-form button {
-      padding: 8px 15px;
-      border-radius: 5px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-    }
-  </style>
+  <title>دردشة مع الادمن</title>
+  <link rel="stylesheet" href="/css/style.css">
 </head>
-<body><% layout = false %>
-
+<body>
+  <%- include('partials/header') %>
   <div class="chat-container">
-    <h2>Chat with <%= otherUser.username %></h2>
-
-    <div id="msgs">
-      <% messages.forEach(m => { 
-        const isSent = String(m.sender) === String(user.id);
-      %>
-        <div class="<%= isSent ? 'sent' : 'recv' %> chat-box" style="background-color: var(--chat-bg-color); color: var(--chat-text-color);">
-          
-          <% if (m.message) { %>
-            <p><%= m.message %></p>
-          <% } %>
-
-          <small><%= new Date(m.createdAt).toLocaleTimeString() %></small>
-
-          <div class="sentiment">
-            <% if (m.emotion === 'حب') { %>
-              <span style="color:pink;">💖 Love</span>
-            <% } else if (m.emotion === 'إيجابي') { %>
-              <span style="color:green;">😊 Positive</span>
-            <% } else if (m.emotion === 'ممتن') { %>
-              <span style="color:blue;">🙏 Grateful</span>
-            <% } else if (m.emotion === 'غضب') { %>
-              <span style="color:red;">😡 Angry</span>
-            <% } else if (m.emotion === 'سلبي') { %>
-              <span style="color:red;">😞 Negative</span>
-            <% } else { %>
-              <span style="color:gray;">😐 Neutral</span>
-            <% } %>
+    <div id="chat-box">
+      <div class="messages">
+        <% conversation.messages.forEach(function(message) { %>
+          <div class="message <%= message.sender === 'admin' ? 'admin' : 'student' %>">
+            <span><%= message.content %></span>
+            <small><%= formatDate(message.sentAt) %></small>
           </div>
-        </div>
-      <% }) %>
+        <% }) %>
+      </div>
+      <textarea id="message-input" placeholder="اكتب رسالتك..."></textarea>
+      <button id="send-btn">إرسال</button>
     </div>
-
-    <!-- فقط نموذج إرسال الرسائل بدون مرفقات -->
-    <form action="/chat/send/<%= otherUser._id %>" method="POST" class="message-form">
-      <input type="text" name="message" placeholder="Type a message..." required />
-      <button type="submit">Send</button>
-    </form>
   </div>
 
-  <script src="/socket.io/socket.io.js"></script>
-<script>
+  <script src="/js/socket.io.js"></script>
+  <script>
     const socket = io();
+    const userId = <%= conversation.user._id %>;
 
-    // عند الاتصال، إعلام الخادم بأن المستخدم متصل
-    socket.emit('userConnected', '<%= user.id %>');
+    socket.emit('start-chat', userId);
 
-    // عند إرسال رسالة
-    function sendMessage() {
-        const messageText = document.getElementById('messageInput').value;
-        const receiverId = '<%= otherUser.id %>'; // يجب أن تأخذ هذا من واجهة المستخدم
-        const senderId = '<%= user.id %>';
-
-        socket.emit('sendMessage', {
-            senderId,
-            receiverId,
-            messageText
-        });
-
-        document.getElementById('messageInput').value = ''; // إفراغ حقل الإدخال بعد الإرسال
-    }
-
-    // استقبال الرسائل الجديدة عبر WebSocket
-    socket.on('newMessage', (message) => {
-        const messagesContainer = document.getElementById('messages');
-        const div = document.createElement('div');
-        div.className = message.sender === '<%= user.id %>' ? 'sent' : 'recv';
-        div.innerHTML = `<p>${message.text}</p><small>${new Date(message.createdAt).toLocaleTimeString()}</small>`;
-        messagesContainer.appendChild(div);
-        messagesContainer.scrollTop = messagesContainer.scrollHeight; // التمرير التلقائي
+    document.getElementById('send-btn').addEventListener('click', () => {
+      const message = document.getElementById('message-input').value;
+      if (message) {
+        socket.emit('send-message', { userId, message });
+        document.getElementById('message-input').value = '';
+      }
     });
-</script>
 
+    socket.on('receive-message', (message) => {
+      const messageElement = document.createElement('div');
+      messageElement.className = message.sender === 'admin' ? 'message admin' : 'message student';
+      messageElement.innerHTML = `
+        <span>${message.content}</span>
+        <small>${message.sentAt}</small>
+      `;
+      document.querySelector('.messages').appendChild(messageElement);
+    });
+  </script>
+  <%- include('partials/footer') %>
 </body>
 </html>
-
