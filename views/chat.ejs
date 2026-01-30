@@ -22,10 +22,11 @@
     </div>
   </div>
 
-  <script src="/js/socket.io.js"></script>
+  <!-- Use a CDN for socket.io -->
+  <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
   <script>
     const socket = io();
-    const userId = <%= conversation.user.id %>;
+    const userId = <%= JSON.stringify(conversation.user.id) %>;
 
     socket.emit('start-chat', userId);
 
@@ -49,4 +50,3 @@
   </script>
 </body>
 </html>
-
