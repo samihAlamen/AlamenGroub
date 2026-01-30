@@ -6,7 +6,7 @@ const Message = require('../models/ChatMessage');
 
 // صفحة الدردشة العامة
 router.get('/chat', ensureAuth, ensureRole('user'), async (req, res) => {
-  const userId = req.user._id;
+  const userId = req.user.id;
   let conversation = await Conversation.findOne({ user: userId }).populate('messages');
   if (!conversation) {
     conversation = new Conversation({ user: userId, messages: [] });
@@ -26,4 +26,5 @@ router.get('/admin-chat', ensureAuth, ensureRole('admin'), async (req, res) => {
 });
 
 module.exports = router;
+
 
