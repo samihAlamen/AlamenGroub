@@ -16,7 +16,8 @@ const messageSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }  // تاريخ إنشاء الرسالة
 });
 
-module.exports = mongoose.model('Message', messageSchema);
+module.exports = mongoose.model('chates', messageSchema);
+
 
 
 
