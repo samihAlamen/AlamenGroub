@@ -17,7 +17,7 @@ const initSocket = (server) => {
         conversation = new Conversation({ user: userId, messages: [] });
         await conversation.save();
       }
-      socket.join(conversation._id.toString());
+      socket.join(conversation.id.toString());
     });
 
     // عندما يتم ارسال رسالة
@@ -27,13 +27,13 @@ const initSocket = (server) => {
 
       if (conversation) {
         const newMessage = new Message({
-          conversation: conversation._id,
+          conversation: conversation.id,
           sender: userId,
           content: message,
           sentAt: new Date(),
         });
         await newMessage.save();
-        io.to(conversation._id.toString()).emit('receive-message', newMessage);
+        io.to(conversation.id.toString()).emit('receive-message', newMessage);
       }
     });
 
@@ -57,3 +57,4 @@ const initSocket = (server) => {
 };
 
 module.exports = initSocket;
+
