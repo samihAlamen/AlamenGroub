@@ -17,7 +17,6 @@ router.use(
   chatRoutes
 );
 
-// Admin dashboard
 router.get(
   "/",
   ensureAuth,
@@ -32,23 +31,34 @@ router.get(
       // جلب بيانات الأدمن بناءً على _id
       const userAdmin = await User.findById(req.user.id);
 
-      // تحقق من أن البيانات الخاصة بالأدمن موجودة
       if (!userAdmin) {
         return res.status(404).send("Admin not found");
       }
 
       // جلب الدردشات الخاصة بالأدمن
-      const chats = await Chat.find({ adminId: req.user.id })  // تأكد من أن adminId موجود في موديل الدردشة
-        .populate("userId", "name email") // استرجاع معلومات المستخدمين المرتبطين بالدردشة (اختياري)
-        .populate("messages.userId", "name");  // استرجاع معلومات المرسل في كل رسالة إذا كان لديك "messages" في الـ Chat
+      const chats = await Chat.find({ adminId: req.user.id })
+        .populate("userId", "name email")
+        .populate("messages.userId", "name");
+
+      // بيانات الرسم البياني (عدد المنح المتاحة والمنتهية)
+      const availableScholarships = await Scholarship.countDocuments({ status: 'available' });
+      const expiredScholarships = await Scholarship.countDocuments({ status: 'expired' });
+
+      // بيانات الرسم البياني
+      const chartData = {
+        labels: ['المنح المتاحة', 'المنح المنتهية'],
+        data: [availableScholarships, expiredScholarships]
+      };
 
       // عرض الصفحة مع بيانات الأدمن والدردشات
       res.render("admin/dashboard", {
         title: "Admin Dashboard",
         user: req.user,
-        profileUser: userAdmin, // تمرير بيانات الأدمن إلى الصفحة
-        chats: chats,           // تمرير بيانات الدردشات الخاصة بالأدمن
+        profileUser: userAdmin,
+        chats: chats,
+        chartData: chartData  // تمرير بيانات الرسم البياني إلى الصفحة
       });
+
     } catch (err) {
       console.error(err);
       res.status(500).send("Internal Server Error");
@@ -72,6 +82,7 @@ router.use(
 );
 
 module.exports = router;
+
 
 
 
