@@ -165,7 +165,7 @@
                     <li class="nav-item"><a class="nav-link" href="/about">عن المكتب</a></li>
                     <li class="nav-item"><a class="nav-link" href="/contact">تواصل معنا</a></li>
 <!-- زر المحادثات -->
-      <% if (user && user.role === 'student') { %>
+      <% if (user && user.role === 'user') { %>
         <!-- إذا كان المستخدم طالبًا -->
         <li><a href="/chat">دردش مع الادمن</a></li>
       <% } else if (user && user.role === 'admin') { %>
@@ -253,6 +253,7 @@
 
 </body>
 </html>
+
 
 
 
