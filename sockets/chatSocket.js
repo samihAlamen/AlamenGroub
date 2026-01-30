@@ -12,30 +12,31 @@ const initSocket = (server) => {
 
     // عندما يبدأ الطالب الدردشة مع الادمن
     socket.on('start-chat', async (userId) => {
-      let conversation = await Conversation.findOne({ user: userId });
-      if (!conversation) {
-        conversation = new Conversation({ user: userId, messages: [] });
-        await conversation.save();
-      }
-      socket.join(conversation.id.toString());
-    });
+  let conversation = await Conversation.findOne({ participants: userId });
+  if (!conversation) {
+    conversation = new Conversation({ participants: [userId], messages: [] });
+    await conversation.save();
+  }
+  socket.join(conversation.id.toString());
+});
 
-    // عندما يتم ارسال رسالة
-    socket.on('send-message', async (data) => {
-      const { userId, message } = data;
-      const conversation = await Conversation.findOne({ user: userId });
 
-      if (conversation) {
-        const newMessage = new Message({
-          conversation: conversation.id,
-          sender: userId,
-          content: message,
-          sentAt: new Date(),
-        });
-        await newMessage.save();
-        io.to(conversation.id.toString()).emit('receive-message', newMessage);
-      }
+   socket.on('send-message', async (data) => {
+  const { userId, message } = data;
+  const conversation = await Conversation.findOne({ participants: userId });
+
+  if (conversation) {
+    const newMessage = new Message({
+      conversation: conversation.id,
+      sender: userId,
+      content: message,
+      sentAt: new Date(),
     });
+    await newMessage.save();
+    io.to(conversation.id.toString()).emit('receive-message', newMessage);
+  }
+});
+
 
     // عندما يقوم المدير بالرد
     socket.on('admin-send-message', async (data) => {
@@ -57,4 +58,5 @@ const initSocket = (server) => {
 };
 
 module.exports = initSocket;
+
 
