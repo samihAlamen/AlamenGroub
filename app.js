@@ -14,7 +14,7 @@ const { Server } = require('socket.io');
 // تحميل إعدادات البيئة
 dotenv.config();
 
-// اتصال قاعدة البيانات
+
 const dbConnect = require('./config/db');
 dbConnect();
 
